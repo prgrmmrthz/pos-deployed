@@ -1,0 +1,126 @@
+<div class="container">
+    <br>
+    <div class="alert alert-info"><i class="fa fa-fw fa-info-circle fa-lg"></i>
+        <strong>Click print to generate and view stocks record.</strong>
+    </div>
+
+
+    <div class="card">
+        <div class="card-header">Orders Report Generator</div>
+        <div class="card-body">
+
+            <form [formGroup]="frmSearch" (ngSubmit)="onSearch()">
+                <div class="input-group mb-3">
+                    <input type="text" formControlName="term" (keyup)="onSearch()" class="form-control"
+                        placeholder="Search Keyword">
+                    <div class="input-group-append">
+                        <!-- <button type="button" (click)="onSearch()" class="btn btn-success"><i class="fa fa-search"
+                    aria-hidden="true"></i></button> -->
+                        <button type="button" class="btn btn-primary" (click)="onRefresh()"><i
+                                class="fa fa-fw fa-refresh"></i>Refresh</button>
+                    </div>
+                </div>
+                Sort By:
+                <div class="row justify-content-around">
+                    <div class="col-responsive">
+                        <div class="form-group">
+                            <div class="btn-group btn-group-sm" btnRadioGroup formControlName="option">
+                                <label *ngFor="let item of searchOptions" [btnRadio]="item.hKey" class="btn btn-primary"
+                                    tabindex="0" role="button" (click)="onSearch()">{{item.value}}</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-reponsive">
+                        <div class="form-group">
+                            <div class="btn-group btn-group-sm" btnRadioGroup formControlName="option2">
+                                <label btnRadio="asc" class="btn btn-info" tabindex="0" role="button"
+                                    (click)="onSearch()">Ascending</label>
+                                <label btnRadio="desc" class="btn btn-info" tabindex="0" role="button"
+                                    (click)="onSearch()">Descending</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <button class="btn btn-sm btn-success" (click)="print()"><i
+                    class="fa fa-fw fa-print fa-lg"></i><b>Print</b></button>
+
+        </div>
+    </div>
+    <br>
+    <div>
+        <!--Content To Print-->
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Order#</th>
+                        <th>Date</th>
+                        <th>Order Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr [class.active]="t.id == selectedId" (click)="selectData(t.id)" *ngFor="let t of Data">
+                        <td>{{t.id}}</td>
+                        <td>{{t.date}}</td>
+                        <td class="font-weight-bold" align="right">{{t.ordertotal | currency : '₱'}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div bsModal #orderSummary="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dialog-child-name">
+        <div class="modal-lg modal-dialog-scrollable modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary mb-3" style="color:white;">
+                    <i class="fa fa-leaf"></i>
+                    <h4 id="dialog-child-name" class="modal-title pull-left">Order Summary</h4>
+                </div>
+    
+                <div class="modal-body">
+                    <div id="toPrint">
+                        <table cellpadding="2" item-width="100%">
+                            <tr>
+                                <td class="font-weight-bold" *ngIf="storename">{{storename}}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Order#{{selectedId}}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">{{date}}</td>
+                            </tr>
+                            <tr *ngFor="let t of dataItems">
+                                <td align="left">{{t.name}}
+                                    <br>
+                                    <small>{{t.price | currency : '₱'}} x {{t.qty}}</small>
+                                </td>
+                                <td align="right">{{t.total | currency : '₱'}}</td>
+                            </tr>
+                            <tr>
+                                <td>Total</td>
+                                <td class="font-weight-bold" align="right">{{ordertotal | currency : '₱'}}</td>
+                            </tr>
+                            <tr>
+                                <td>Amount Tendered</td>
+                                <td class="font-weight-bold" align="right">{{amountTendered | currency : '₱'}}</td>
+                            </tr>
+                            <tr>
+                                <td>Change</td>
+                                <td class="font-weight-bold" align="right">{{change | currency : '₱'}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div>
+                        <button [autofocus] id="print" class="btn btn-primary">Print</button>
+                    </div>
+                    <div>
+                        <button class="btn btn-success">New Order</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

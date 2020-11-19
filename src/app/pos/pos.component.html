@@ -1,0 +1,246 @@
+<div *ngIf="loading" id="overlay">
+</div>
+<div class="container">
+    <div class="container d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">
+            <i class="fas fa-cash-register mr-4"></i> POS</h1>
+
+        <div class="btn-toolbar mb-2 mb-md-0">
+
+            <div class="btn-group mr-2">
+                <button class="btn btn-sm btn-success" (click)="onCheckout()">
+                    <i class="far fa-save mr-1"></i>Checkout [Ctrl+S]</button>
+            </div>
+            <a class="btn btn-sm btn-secondary" [routerLink]="['/products']">Add Product</a>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header mb-3">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap">
+                <div>
+                    <i class="fas fa-table mr-1"></i>Order#:
+                    <b>{{orderNumber}}</b>
+                </div>
+                <div>
+                    <button style="color:white" class="btn btn-sm btn-primary" [class.btn-danger]="multiMode" (click)="multiMode=!multiMode">{{multiMode? 'Multi': 'Single'}} Mode [ALT]</button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div>
+                <label>Barcode:
+                    <input type="text" id="barcode" onfocus="document.execCommand('selectAll',false,null)" [(ngModel)]="barcode" (keyup.enter)="onBarcode()">
+                </label>
+
+            </div>
+            <div class="hdn">
+                <input type="text" id="searchbar" [(ngModel)]="selectedValue" onfocus="document.execCommand('selectAll',false,null)" [typeahead]="productData"
+                    typeaheadOptionField="name" (typeaheadOnSelect)="onSelect($event)" class="form-control" placeholder="Search"
+                    typeaheadSingleWords="true" [typeaheadScrollable]="true" [typeaheadOptionsInScrollableView]="8">
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="card mb-4">
+        <div class="card-header mb-3">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap">
+                <div>
+                    <i class="fas fa-shopping-cart mr-1"></i>Cart
+                </div>
+                <button class="btn btn-warning" (click)="onVoid()">
+                    <i class="fas fa-ban mr-1"></i>Void</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-sm">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Quantity</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let t of dataItems; let i = index">
+                            <td>
+                                <ng-container>
+                                    <input type="text" readonly [ngModel]="t.qty" (click)="onEditProduct(t)">
+                                </ng-container>
+                            </td>
+                            <td>{{t.name}}</td>
+                            <td>
+                                <ng-container>
+                                    <input type="text" readonly [ngModel]="t.price" (click)="onEditProduct(t)">
+                                </ng-container>
+                            </td>
+                            <td>{{t.total | currency : '₱'}}</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-danger" style="color:yellow; border-radius: 50%; width:2.5em; height:2.5em; font-weight: bolder"
+                                    (click)="onRemove(t.id, t.name)">X</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td>Order total:</td>
+                            <td>{{ordertotal | currency : '₱'}}</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #childModal="bs-modal" class="modal modal-md fade" tabindex="-1" role="dialog" aria-labelledby="dialog-child-name">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary mb-3" style="color:white;">
+                <i class="fa fa-leaf"></i>
+                <h4 id="dialog-child-name" class="modal-title pull-left">Product Form [{{mode===1 ? 'Insert' : 'Edit'}}]</h4>
+                <!-- <button type="button" class="close pull-right" aria-label="Close" (click)="hideChildModal()">
+                    <span aria-hidden="true">&times;</span>
+                </button> -->
+            </div>
+            <form [formGroup]="frmProduct" (ngSubmit)="onFormSave()">
+                <div class="modal-body">
+                    <div class="alert alert-primary" role="alert" style="border:1px solid lightyellow;font:12px; border-left:3px solid blue;">
+                        <i class="fa fa-info-circle fa-lg"></i> Enter quantity and price.
+                    </div>
+                    <div>
+                        <div class="col">
+                            <label>Product Name </label>
+                            <input type="text" placeholder="Enter Product Name" class="form-control" formControlName="name">
+                        </div>
+                        <div class="col">
+                            <label>Quantity </label>
+                            <input type="number" [autofocus] id="qty" placeholder="Enter Quantity" class="form-control" formControlName="qty">
+                        </div>
+                        <div class="col">
+                            <label>Price </label>
+                            <input type="number" placeholder="Enter Price" class="form-control" formControlName="price">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div>
+                        <button type="submit" class="btn btn-success" [disabled]="!frmProduct.valid">Save</button>
+                    </div>
+                    <div>
+                        <button type="reset" class="btn btn-danger" (click)="onCancel()">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div bsModal #paymentModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dialog-child-name">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary mb-3" style="color:white;">
+                <i class="fa fa-leaf"></i>
+                <h4 id="dialog-child-name" class="modal-title pull-left">Payment Form</h4>
+            </div>
+            <form (ngSubmit)="onSavePayment()">
+                <div class="modal-body">
+                    <div class="alert alert-primary" role="alert" style="border:1px solid lightyellow;font:12px; border-left:3px solid blue;">
+                        <i class="fa fa-info-circle fa-lg"></i> Enter amount tendered and click save to proceed.
+                    </div>
+                    <div>
+                        <div class="col">
+                            <h4>To Pay:
+                                <b>{{ordertotal | currency : '₱'}}</b>
+                            </h4>
+                        </div>
+                        <div class="col">
+                            <p>Change:
+                                <b>{{change | currency : '₱'}}</b>
+                            </p>
+                        </div>
+                        <br>
+                        <div class="col">
+                            <label>Amount Tendered </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">₱</span>
+                                </div>
+                                <input [autofocus] id="amountTendered" [(ngModel)]="amountTendered" (change)="computeChange()" type="number" class="form-control rounded-right"
+                                    required [ngModelOptions]="{standalone: true}">
+                                <div class="invalid-feedback">
+                                    Please choose a username.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div>
+                        <button type="submit" [disabled]="validatePayment()" class="btn btn-success">Process Payment</button>
+                    </div>
+                    <div>
+                        <button type="reset" class="btn btn-danger" (click)="onCancelPayment()">Return to Sale</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div bsModal #orderSummary="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dialog-child-name">
+    <div class="modal-lg modal-dialog-scrollable modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary mb-3" style="color:white;">
+                <i class="fa fa-leaf"></i>
+                <h4 id="dialog-child-name" class="modal-title pull-left">Order Summary</h4>
+            </div>
+
+            <div class="modal-body">
+                <div id="toPrint">
+                    <table cellpadding="2" item-width="100%">
+                        <tr>
+                            <td class="font-weight-bold" *ngIf="storename">{{storename}}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Order#{{orderNumber}}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">{{date}}</td>
+                        </tr>
+                        <tr *ngFor="let t of dataItems">
+                            <td align="left">{{t.name}}
+                                <br>
+                                <small>{{t.price | currency : '₱'}} x {{t.qty}}</small>
+                            </td>
+                            <td align="right">{{t.total | currency : '₱'}}</td>
+                        </tr>
+                        <tr>
+                            <td>Total</td>
+                            <td class="font-weight-bold" align="right">{{ordertotal | currency : '₱'}}</td>
+                        </tr>
+                        <tr>
+                            <td>Amount Tendered</td>
+                            <td class="font-weight-bold" align="right">{{amountTendered | currency : '₱'}}</td>
+                        </tr>
+                        <tr>
+                            <td>Change</td>
+                            <td class="font-weight-bold" align="right">{{change | currency : '₱'}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div>
+                    <button [autofocus] id="print" class="btn btn-primary" (click)="onPrint()">Print</button>
+                </div>
+                <div>
+                    <button class="btn btn-success" (click)="newOrder()">New Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

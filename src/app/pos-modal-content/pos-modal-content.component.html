@@ -1,0 +1,29 @@
+<div class="modal-header">
+    <h4 class="modal-title">Form</h4>
+  </div>
+  <form [formGroup]="frmProduct" (ngSubmit)="onSave()">
+      <div class="modal-body">
+          <div>
+              <div class="col">
+                  <label>Product Name </label>
+                  <input type="text" placeholder="Enter Product Name" class="form-control" formControlName="name">
+              </div>
+              <div class="col">
+                  <label>Quantity </label>
+                  <input type="text" placeholder="Enter Quantity" class="form-control" formControlName="qty">
+              </div>
+              <div class="col">
+                  <label>Price </label>
+                  <input type="number" placeholder="Enter Price" class="form-control" formControlName="price">
+              </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+          <div>
+              <button type="submit" class="btn btn-success" [disabled]="!frmProduct.valid">Save</button>
+          </div>
+          <div>
+              <button type="reset" class="btn btn-danger" (click)="onCancel()">Cancel</button>
+          </div>
+      </div>
+  </form>

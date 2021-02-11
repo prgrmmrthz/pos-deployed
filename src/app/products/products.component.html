@@ -12,7 +12,7 @@
                 <div>
                         <button class="btn btn-primary" (click)="openModal(template); mode=1">New Product</button>
                 </div>
-                
+
             </div>
         </div>
         <div class="card-body">
@@ -36,6 +36,9 @@
                                 <th>Product</th>
                                 <th>Barcode</th>
                                 <th>Price</th>
+                                <th>Unit Price</th>
+                                <th>Wholesale Price</th>
+                                <th>Classification</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -44,6 +47,9 @@
                                 <td>{{t.name}}</td>
                                 <td>{{t.barcode}}</td>
                                 <td>{{t.price}}</td>
+                                <td>{{t.unit_price}}</td>
+                                <td>{{t.wholesale_price}}</td>
+                                <td>{{t.class_id}}</td>
                                 <td class="text-right">
                                     <i class="btn btn-sm btn-warning" style="color:black" (click)="onEditProduct(t, template)">Edit</i>
                                     ||
@@ -75,6 +81,18 @@
                     </div>
                     <div class="col">
                         <label>Price </label>
+                        <input type="number" placeholder="Enter Price" class="form-control" formControlName="price">
+                    </div>
+                    <div class="col">
+                        <label>Unit Price </label>
+                        <input type="number" placeholder="Enter Price" class="form-control" formControlName="unit_price">
+                    </div>
+                    <div class="col">
+                        <label>Wholesale Price </label>
+                        <input type="number" placeholder="Enter Price" class="form-control" formControlName="wholesale_price">
+                    </div>
+                    <div class="col">
+                        <label>Classification </label>
                         <input type="number" placeholder="Enter Price" class="form-control" formControlName="price">
                     </div>
                 </div>

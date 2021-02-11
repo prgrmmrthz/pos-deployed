@@ -46,7 +46,8 @@ export class PosComponent implements OnInit, OnDestroy {
   multiMode: boolean;
   change=0;
   amountTendered: number;
-  date=new Date().toLocaleString();
+  date="";
+  time="";
 
   constructor(
     private be: BackendService,
@@ -67,7 +68,11 @@ export class PosComponent implements OnInit, OnDestroy {
     this.checkPreviousOrder();
     this.getProduct();
     this.storename=localStorage.getItem('storename') || '';
-    
+    const tinput = this.el.nativeElement.querySelector('#barcode');
+    tinput.focus();
+    let a = new Date();
+    this.date=`${a.getMonth()+1}/${a.getDate()}/${a.getFullYear()}`;
+    this.time=`${a.getHours()}:${a.getMinutes()}`;
   }
 
   onCheckout() {
@@ -296,7 +301,9 @@ export class PosComponent implements OnInit, OnDestroy {
             },
             () => {
               this.loading = false;
-            }
+              const tinput2 = this.el.nativeElement.querySelector('#barcode');
+              tinput2.select();
+                    }
           );
           this.mode=1;
           this.computeTotal();
@@ -366,7 +373,8 @@ export class PosComponent implements OnInit, OnDestroy {
       this.loading=false;
       const tinput = this.el.nativeElement.querySelector('#searchbar');
       tinput.value='';
-      tinput.select();
+      const tinput2 = this.el.nativeElement.querySelector('#barcode');
+      tinput2.select();
     });
   }
 

@@ -11,8 +11,8 @@ const httpOptions = {
 })
 export class BackendService {
 
-  private gu = 'http://localhost/api/general';
-  //private gu = 'http://localhost:36076/api/general';
+  //private gu = 'http://localhost:81/api/general';
+  private gu = 'http://localhost:36076/api/general';
   //private gu = 'http://localhost:4000/general';
 
   constructor(private http: HttpClient) { }

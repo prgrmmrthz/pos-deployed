@@ -47,8 +47,11 @@
                 <div>
                     <i class="fas fa-shopping-cart mr-1"></i>Cart
                 </div>
-                <button class="btn btn-warning" (click)="onVoid()">
-                    <i class="fas fa-ban mr-1"></i>Void</button>
+                <div>
+                    <h1>Total: {{ordertotal | currency : '₱'}}</h1>
+                    <button class="btn btn-warning" (click)="onVoid()">
+                        <i class="fas fa-ban mr-1"></i>Void</button>
+                </div>
             </div>
         </div>
         <div class="card-body">
@@ -65,29 +68,22 @@
                     </thead>
                     <tbody>
                         <tr *ngFor="let t of dataItems; let i = index">
-                            <td>
+                            <td (click)="onEditProduct(t)">
                                 <ng-container>
                                     <input type="text" readonly [ngModel]="t.qty" (click)="onEditProduct(t)">
                                 </ng-container>
                             </td>
-                            <td>{{t.name}}</td>
-                            <td>
+                            <td (click)="onEditProduct(t)">{{t.name}}</td>
+                            <td (click)="onEditProduct(t)">
                                 <ng-container>
                                     <input type="text" readonly [ngModel]="t.price" (click)="onEditProduct(t)">
                                 </ng-container>
                             </td>
-                            <td>{{t.total | currency : '₱'}}</td>
+                            <td (click)="onEditProduct(t)">{{t.total | currency : '₱'}}</td>
                             <td class="text-center">
                                 <button class="btn btn-sm btn-danger" style="color:yellow; border-radius: 50%; width:2.5em; height:2.5em; font-weight: bolder"
                                     (click)="onRemove(t.id, t.name)">X</button>
                             </td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td>Order total:</td>
-                            <td>{{ordertotal | currency : '₱'}}</td>
-                            <td></td>
                         </tr>
                     </tbody>
                 </table>
@@ -210,6 +206,7 @@
                         </tr>
                         <tr>
                             <td class="font-weight-bold">{{date}}</td>
+                            <td class="font-weight-bold">{{time}}</td>
                         </tr>
                         <tr *ngFor="let t of dataItems">
                             <td align="left">{{t.name}}

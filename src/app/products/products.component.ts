@@ -38,7 +38,10 @@ export class ProductsComponent implements OnInit {
     this.frmProduct = this.fb.group({
       name: ["", Validators.required],
       barcode: [""],
-      price: [0]
+      price: [0],
+      unit_price: [0],
+      wholesale_price: [0],
+      class_id: [1]
     });
   }
 
@@ -51,7 +54,7 @@ export class ProductsComponent implements OnInit {
   getProducts(page: number, term?: string) {
       this.loading = true;
       let params: Dsmodel = {
-        cols: 'id,name,barcode,price',
+        cols: 'id,name,barcode,price,unit_price,wholesale_price,class_id',
         table: 'products',
         order: 'name asc',
         limit: `${page},${(term) ? 100 : 1000}`,
@@ -83,9 +86,9 @@ export class ProductsComponent implements OnInit {
     this.loading = true;
     let p = '';
     if (this.mode == 2) {
-      p = `updateProduct('${this.g('barcode')}', '${this.g('name')}','${this.g('price')}',${this.productId})`;
+      p = `updateProduct('${this.g('barcode')}', '${this.g('name')}','${this.g('price')}','${this.g('unit_price')}','${this.g('wholesale_price')}','${this.g('class_id')}',${this.productId})`;
     } else {
-      p = `insertProduct('${this.g('barcode')}', '${this.g('name')}','${this.g('price')}')`;
+      p = `insertProduct('${this.g('barcode')}', '${this.g('name')}','${this.g('price')}','${this.g('unit_price')}','${this.g('wholesale_price')}','${this.g('class_id')}')`;
     }
     const a = { fn: p };
     this.subs = this.be.callSP(a).subscribe(
@@ -150,7 +153,10 @@ export class ProductsComponent implements OnInit {
     this.frmProduct.patchValue({
       name: t.name,
       barcode: t.barcode,
-      price: t.price
+      price: t.price,
+      unit_price: t.unit_price,
+      wholesale_price: t.wholesale_price,
+      class_id: t.class_id
     });
     this.loading = false;
     this.mode = 2;
@@ -182,7 +188,7 @@ export class ProductsComponent implements OnInit {
           alert('error');
           this.loading = false;
         },()=>{
-          
+
         });
       } else {
         this.loading = false;

@@ -16,6 +16,7 @@ export class ProductsComponent implements OnInit {
   modalRef: BsModalRef;
   productsData = [];
   Data = [];
+  classificationsData=[];
   dataToSave = [];
   logs = [];
   loading = false;
@@ -47,6 +48,7 @@ export class ProductsComponent implements OnInit {
 
 
   ngOnInit(): void {
+    this.getClassifications();
     this.productsData=[];
     this.getProducts(0);
   }
@@ -54,19 +56,35 @@ export class ProductsComponent implements OnInit {
   getProducts(page: number, term?: string) {
       this.loading = true;
       let params: Dsmodel = {
-        cols: 'id,name,barcode,price,unit_price,wholesale_price,class_id',
-        table: 'products',
-        order: 'name asc',
-        limit: `${page},${(term) ? 100 : 1000}`,
-        wc: (term) ? `barcode like '%${term}%' or name like '%${term}%'` : ''
+        cols: 'p.id,p.name,p.barcode,p.price,p.unit_price,p.wholesale_price,p.class_id,c.name as classification',
+        table: 'products p',
+        join: 'left join classifications c on c.id=p.class_id',
+        order: 'p.name asc',
+        limit: `${page},${(term) ? 10 : 50}`,
+        wc: (term) ? `p.barcode like '%${term}%' or p.name like '%${term}%'` : ''
       }
       this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
-        this.productsData.push(...d);
+        this.productsData= [...d];
       }, (e) => {
         this.loading = false;
         console.error(e);
       }, () => this.loading = false);
   }
+
+  getClassifications() {
+    this.loading = true;
+    let params: Dsmodel = {
+      cols: 'id,name',
+      table: 'classifications',
+      order: 'name asc'
+    }
+    this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
+      this.classificationsData.push(...d);
+    }, (e) => {
+      this.loading = false;
+      console.error(e);
+    }, () => this.loading = false);
+}
 
   openModal(template: TemplateRef<any>) {
     const config = {

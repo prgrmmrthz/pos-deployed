@@ -49,7 +49,7 @@
                                 <td>{{t.price}}</td>
                                 <td>{{t.unit_price}}</td>
                                 <td>{{t.wholesale_price}}</td>
-                                <td>{{t.class_id}}</td>
+                                <td>{{t.classification}}</td>
                                 <td class="text-right">
                                     <i class="btn btn-sm btn-warning" style="color:black" (click)="onEditProduct(t, template)">Edit</i>
                                     ||
@@ -93,7 +93,12 @@
                     </div>
                     <div class="col">
                         <label>Classification </label>
-                        <input type="number" placeholder="Enter Price" class="form-control" formControlName="price">
+                        <br>
+                        <select class="form-select form-control" formControlName="class_id">
+                            <option *ngFor="let c of classificationsData" [ngValue]="c.id">
+                                {{ c.name }}
+                            </option>
+                          </select>
                     </div>
                 </div>
             </div>

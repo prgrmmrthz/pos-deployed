@@ -35,6 +35,9 @@ import { ScrollTrackerDirective } from './scroll-tracker.directive';
 import { PosComponent } from './pos/pos.component';
 import { PosModalContentComponent } from './pos-modal-content/pos-modal-content.component';
 import { OrdersComponent } from './orders/orders.component';
+import { CustomersComponent } from './customers/customers.component';
+import { RankCategoriesComponent } from './rank-categories/rank-categories.component';
+import { DiscountsComponent } from './discounts/discounts.component';
 
 let options: Partial<IConfig> | (() => Partial<IConfig>);
 
@@ -62,6 +65,9 @@ let options: Partial<IConfig> | (() => Partial<IConfig>);
     PosComponent,
     PosModalContentComponent,
     OrdersComponent,
+    CustomersComponent,
+    RankCategoriesComponent,
+    DiscountsComponent,
   ],
   imports: [
     BrowserModule,

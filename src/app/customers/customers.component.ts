@@ -2,30 +2,29 @@ import { Component, OnInit, ElementRef, TemplateRef, OnDestroy } from '@angular/
 import { Subscription } from 'rxjs';
 import { BackendService } from '../backend.service';
 import { Dsmodel } from '../dsmodel.Interface';
-import { TypeaheadMatch } from 'ngx-bootstrap/typeahead/public_api';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-
 @Component({
-  selector: 'app-products',
-  templateUrl: './products.component.html',
-  styleUrls: ['./products.component.css']
+  selector: 'app-customers',
+  templateUrl: './customers.component.html',
+  styleUrls: ['./customers.component.css']
 })
-export class ProductsComponent implements OnInit, OnDestroy {
+export class CustomersComponent implements OnInit, OnDestroy {
+
   modalRef: BsModalRef;
-  productsData = [];
+  itemData = [];
   Data = [];
-  classificationsData=[];
+  ranksData=[];
   dataToSave = [];
   logs = [];
   loading = false;
   subs: Subscription;
   selectedValue: string;
   unitData = [];
-  productId: number;
+  customerId: number;
   mode = 1;
-  frmProduct: FormGroup;
+  frmX: FormGroup;
   term;
   isSearching = false;
   previousCount = 0;
@@ -36,49 +35,45 @@ export class ProductsComponent implements OnInit, OnDestroy {
     private modalService: BsModalService,
     private fb: FormBuilder,
   ) {
-    this.frmProduct = this.fb.group({
+    this.frmX = this.fb.group({
       name: ["", Validators.required],
-      barcode: [""],
-      price: [0],
-      unit_price: [0],
-      wholesale_price: [0],
-      class_id: [1]
+      rank_id: [1, Validators.required]
     });
   }
 
 
   ngOnInit(): void {
-    this.getClassifications();
-    this.productsData=[];
-    this.getProducts(0);
+    this.getRanks();
+    this.itemData=[];
+    this.getItems();
   }
 
-  getProducts(page: number, term?: string) {
+  getItems(term?: string) {
       this.loading = true;
       let params: Dsmodel = {
-        cols: 'p.id,p.name,p.barcode,p.price,p.unit_price,p.wholesale_price,p.class_id,c.name as classification',
-        table: 'products p',
-        join: 'left join classifications c on c.id=p.class_id',
-        order: 'p.name asc',
-        wc: (term) ? `p.barcode like '%${term}%' or p.name like '%${term}%'` : ''
+        cols: 'c.id,c.name,c.rank_id,r.name as rank',
+        table: 'customers c',
+        join: 'left join ranks r on r.id=c.rank_id',
+        order: 'c.name asc',
+        wc: (term) ? `c.name like '%${term}%'` : ''
       }
       this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
-        this.productsData= [...d];
+        this.itemData= [...d];
       }, (e) => {
         this.loading = false;
         console.error(e);
       }, () => this.loading = false);
   }
 
-  getClassifications() {
+  getRanks() {
     this.loading = true;
     let params: Dsmodel = {
       cols: 'id,name',
-      table: 'classifications',
-      order: 'name asc'
+      table: 'ranks',
+      order: 'id asc'
     }
     this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
-      this.classificationsData.push(...d);
+      this.ranksData = [...d];
     }, (e) => {
       this.loading = false;
       console.error(e);
@@ -96,16 +91,16 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   g(formname: string): any {
-    return this.frmProduct.get(formname).value;
+    return this.frmX.get(formname).value;
   }
 
   onSave() {
     this.loading = true;
     let p = '';
     if (this.mode == 2) {
-      p = `updateProduct('${this.g('barcode')}', '${this.g('name')}','${this.g('price')}','${this.g('unit_price')}','${this.g('wholesale_price')}','${this.g('class_id')}',${this.productId})`;
+      p = `updateCustomer('${this.g('name')}',${this.g('rank_id')},${this.customerId})`;
     } else {
-      p = `insertProduct('${this.g('barcode')}', '${this.g('name')}','${this.g('price')}','${this.g('unit_price')}','${this.g('wholesale_price')}','${this.g('class_id')}')`;
+      p = `insertCustomer('${this.g('name')}',${this.g('rank_id')})`;
     }
     const a = { fn: p };
     this.subs = this.be.callSP(a).subscribe(
@@ -118,21 +113,15 @@ export class ProductsComponent implements OnInit, OnDestroy {
             'Database has been updated.',
             'success'
           ).then(() => {
-            this.frmProduct.reset();
+            this.frmX.reset();
             this.modalRef.hide();
-            this.productsData=[];
-            this.getProducts(0);
+            this.itemData=[];
+            this.getItems();
           });
         } else if (x == 3) {
           Swal.fire(
             'Duplicate!',
-            `Product ${this.g('name')} already exist.`,
-            'warning'
-          );
-        } else {
-          Swal.fire(
-            'Duplicate!',
-            `Barcode ${this.g('barcode')} already exist.`,
+            `Customer ${this.g('name')} already exist.`,
             'warning'
           );
         }
@@ -149,31 +138,27 @@ export class ProductsComponent implements OnInit, OnDestroy {
   }
 
   onCancel() {
-    this.frmProduct.reset();
+    this.frmX.reset();
     this.modalRef.hide();
   }
 
   onRefresh() {
     this.isSearching = false;
-    this.productsData=[];
-    this.getProducts(0);
+    this.itemData=[];
+    this.getItems();
   }
 
   onSearch(t) {
     this.isSearching = true;
-    this.productsData = [];
-    this.getProducts(0, t.target.value);
+    this.itemData = [];
+    this.getItems(t.target.value);
   }
 
   onEditProduct(t, template) {
-    this.productId = t.id
-    this.frmProduct.patchValue({
+    this.customerId = t.id
+    this.frmX.patchValue({
       name: t.name,
-      barcode: t.barcode,
-      price: t.price,
-      unit_price: t.unit_price,
-      wholesale_price: t.wholesale_price,
-      class_id: t.class_id
+      rank_id: t.rank_id || 3
     });
     this.loading = false;
     this.mode = 2;
@@ -192,14 +177,14 @@ export class ProductsComponent implements OnInit, OnDestroy {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.value) {
-        this.be.deleteRecord(id, 'products', 'id').subscribe((r) => {
+        this.be.deleteRecord(id, 'customers', 'id').subscribe((r) => {
           Swal.fire(
             'Deleted!',
             name + ' has been deleted.',
             'success'
           ).then(()=>{
-            this.productsData=[];
-            this.getProducts(0);
+            this.itemData=[];
+            this.getItems();
           });
         },()=>{
           alert('error');
@@ -213,13 +198,13 @@ export class ProductsComponent implements OnInit, OnDestroy {
     })
   }
 
-  updateScrollPos(e) {
+  /* updateScrollPos(e) {
     if (e.endReached && !this.isSearching) {
-      const c = this.productsData.length;
+      const c = this.itemData.length;
       this.previousCount = c;
-      this.getProducts(c);
+      this.getItems();
     }
-  }
+  } */
 
   ngOnDestroy(): void {
     if (this.subs) {

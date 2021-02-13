@@ -2,15 +2,15 @@
 </div>
 <div class="container">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">Products</h1>
+        <h1 class="h2">Customers</h1>
         <a class="btn btn-sm btn-secondary" [routerLink]="['/pos']">POS</a>
     </div>
     <div class="card">
         <div class="card-header">
             <div class="d-flex justify-content-between">
-                <span>Products List</span>
+                <span>Customers List</span>
                 <div>
-                        <button class="btn btn-primary" (click)="openModal(template); mode=1">New Product</button>
+                        <button class="btn btn-primary" (click)="openModal(template); mode=1">New Item</button>
                 </div>
 
             </div>
@@ -33,23 +33,15 @@
                     <table class="table table-bordered table-sm">
                         <thead class="thead-dark">
                             <tr>
-                                <th>Product</th>
-                                <th>Barcode</th>
-                                <th>Price</th>
-                                <th>Unit Price</th>
-                                <th>Wholesale Price</th>
-                                <th>Classification</th>
+                                <th>Name</th>
+                                <th>Rank</th>
                                 <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr *ngFor="let t of productsData">
+                            <tr *ngFor="let t of itemData">
                                 <td>{{t.name}}</td>
-                                <td>{{t.barcode}}</td>
-                                <td>{{t.price}}</td>
-                                <td>{{t.unit_price}}</td>
-                                <td>{{t.wholesale_price}}</td>
-                                <td>{{t.classification}}</td>
+                                <td>{{t.rank}}</td>
                                 <td class="text-right">
                                     <i class="btn btn-sm btn-warning" style="color:black" (click)="onEditProduct(t, template)">Edit</i>
                                     ||
@@ -66,37 +58,21 @@
 
     <ng-template #template>
         <div class="modal-header">
-            <h4 class="modal-title pull-left">Product [{{mode==1 ? 'New' : 'Edit'}}]</h4>
+            <h4 class="modal-title pull-left">Customer [{{mode==1 ? 'New' : 'Edit'}}]</h4>
         </div>
-        <form [formGroup]="frmProduct" (ngSubmit)="onSave()">
+        <form [formGroup]="frmX" (ngSubmit)="onSave()">
             <div class="modal-body">
                 <div>
                     <div class="col">
                         <label>Product Name </label>
-                        <input type="text" placeholder="Enter Product Name" class="form-control" formControlName="name">
+                        <input type="text" placeholder="Enter Customer Name" class="form-control" formControlName="name">
                     </div>
                     <div class="col">
-                        <label>Barcode </label>
-                        <input type="text" placeholder="Enter Barcode" class="form-control" formControlName="barcode">
-                    </div>
-                    <div class="col">
-                        <label>Price </label>
-                        <input type="number" placeholder="Enter Price" class="form-control" formControlName="price">
-                    </div>
-                    <div class="col">
-                        <label>Unit Price </label>
-                        <input type="number" placeholder="Enter Price" class="form-control" formControlName="unit_price">
-                    </div>
-                    <div class="col">
-                        <label>Wholesale Price </label>
-                        <input type="number" placeholder="Enter Price" class="form-control" formControlName="wholesale_price">
-                    </div>
-                    <div class="col">
-                        <label>Classification </label>
+                        <label>Rank </label>
                         <br>
-                        <select class="form-select form-control" formControlName="class_id">
-                            <option *ngFor="let c of classificationsData" [ngValue]="c.id">
-                                {{ c.name }}
+                        <select class="form-select form-control" formControlName="rank_id">
+                            <option *ngFor="let r of ranksData" [ngValue]="r.id">
+                                {{ r.name }}
                             </option>
                           </select>
                     </div>
@@ -104,7 +80,7 @@
             </div>
             <div class="modal-footer">
                 <div>
-                    <button type="submit" class="btn btn-success" [disabled]="!frmProduct.valid">Save</button>
+                    <button type="submit" class="btn btn-success" [disabled]="!frmX.valid">Save</button>
                 </div>
                 <div>
                     <button type="reset" class="btn btn-danger" (click)="onCancel()">Cancel</button>

@@ -19,6 +19,8 @@ import { BoxesReportsComponent } from './boxes-reports/boxes-reports.component';
 import {ProductsComponent} from './products/products.component';
 import {PosComponent} from './pos/pos.component';
 import {OrdersComponent} from './orders/orders.component';
+import { CustomersComponent } from './customers/customers.component';
+import { RankCategoriesComponent } from './rank-categories/rank-categories.component';
 
 
 const routes: Routes = [
@@ -39,6 +41,8 @@ const routes: Routes = [
   {path:'foilreport', component: FoilReportsComponent},
   {path:'boxesreport', component: BoxesReportsComponent},
   {path:'products', component: ProductsComponent},
+  {path:'customers', component: CustomersComponent},
+  {path:'rank-categories', component: RankCategoriesComponent},
   {path:'pos', component: PosComponent},
   {path:'orders', component: OrdersComponent},
   { path: '**', component: PageNotFoundComponent }

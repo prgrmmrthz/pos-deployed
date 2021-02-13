@@ -21,6 +21,7 @@ import {PosComponent} from './pos/pos.component';
 import {OrdersComponent} from './orders/orders.component';
 import { CustomersComponent } from './customers/customers.component';
 import { RankCategoriesComponent } from './rank-categories/rank-categories.component';
+import { DiscountsComponent } from './discounts/discounts.component';
 
 
 const routes: Routes = [
@@ -42,7 +43,8 @@ const routes: Routes = [
   {path:'boxesreport', component: BoxesReportsComponent},
   {path:'products', component: ProductsComponent},
   {path:'customers', component: CustomersComponent},
-  {path:'rank-categories', component: RankCategoriesComponent},
+  {path:'customers', component: CustomersComponent},
+  {path:'discounts', component: DiscountsComponent},
   {path:'pos', component: PosComponent},
   {path:'orders', component: OrdersComponent},
   { path: '**', component: PageNotFoundComponent }

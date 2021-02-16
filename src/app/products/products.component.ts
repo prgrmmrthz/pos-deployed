@@ -60,7 +60,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
         table: 'products p',
         join: 'left join classifications c on c.id=p.class_id',
         order: 'p.name asc',
-        wc: (term) ? `p.barcode like '%${term}%' or p.name like '%${term}%'` : ''
+        wc: (term) ? `p.barcode like '%${term}%' or p.name like '%${term}%' or c.name like '%${term}%'` : ''
       }
       this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
         this.productsData= [...d];

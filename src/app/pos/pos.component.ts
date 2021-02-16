@@ -63,7 +63,8 @@ export class PosComponent implements OnInit, OnDestroy {
     this.frmProduct = this.fb.group({
       name: [{value: "",  disabled: true}],
       qty: [1, [Validators.pattern("^[0-9]*$")]],
-      price: [0]
+      price: [0 ,[Validators.pattern("/^(?:\d*\.\d{1,2}|\d+)$/")]],
+      discount: [0, [Validators.pattern("/^(?:\d*\.\d{1,2}|\d+)$/")]]
     });
 
    }
@@ -74,8 +75,8 @@ export class PosComponent implements OnInit, OnDestroy {
       this.getProduct();
       this.getCustomers();
       this.storename=localStorage.getItem('storename') || '';
-      const tinput = this.el.nativeElement.querySelector('#barcode');
-      tinput.focus();
+      //const tinput = this.el.nativeElement.querySelector('#barcode');
+      //tinput.focus();
       let a = new Date();
       this.date=`${a.getMonth()+1}/${a.getDate()}/${a.getFullYear()}`;
       this.time=`${a.getHours()}:${a.getMinutes()}`;
@@ -119,7 +120,7 @@ export class PosComponent implements OnInit, OnDestroy {
     );
   }
 
-  @HostListener('document:keydown.ALT',['$event'])
+  @HostListener('document:keydown.F1',['$event'])
   handleKeyboardEvent(event: KeyboardEvent){
     event.preventDefault();
     this.multiMode=!this.multiMode;
@@ -158,11 +159,23 @@ export class PosComponent implements OnInit, OnDestroy {
   getProduct() {
     this.loading = true;
     let params: Dsmodel = {
-      cols: 'id,name',
-      table: 'products'
+      cols: 'p.id,p.name,p.price,p.class_id,c.name as class',
+      table: 'products p',
+      join: 'left join classifications c on c.id=p.class_id',
+      order: 'c.name asc'
     }
     this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
-      this.productData = d;
+      this.productData = d.map((v,i) => {
+        const p = {
+          details:  `${v.name} [${v.class}] - P${v.price}`,
+          id: v.id,
+          name: v.name,
+          price: v.price,
+          class_id: v.class_id
+        };
+
+        return p;
+      });
     }, (e) => {
       Swal.fire(
         'Error Loading Data!',
@@ -194,7 +207,7 @@ export class PosComponent implements OnInit, OnDestroy {
           return customer;
         });
         this.selectedCustomer = a[0];
-        console.debug('ito customer',this.selectedCustomer);
+        //console.debug('ito customer',this.selectedCustomer);
       }, (e) => {
         Swal.fire(
           'Error Loading Data!',
@@ -243,19 +256,20 @@ export class PosComponent implements OnInit, OnDestroy {
     this.frmProduct.patchValue({
       name: t.name,
       price: t.price,
-      qty: t.qty
+      qty: t.qty,
+      discount: t.discount
     });
 
     this.childModal.show();
   }
 
   onFormSave(){
-    let p=this.frmProduct.value.price;
-    let q=this.frmProduct.value.qty;
+    const {price,qty,discount} = this.frmProduct.value;
     let a={
-      price:p ,
-      qty:q,
-      total: q*p
+      price,
+      qty,
+      discount,
+      total: (price*qty) - discount
     }
     this.addProductOrder(a);
     this.frmProduct.reset();
@@ -288,7 +302,7 @@ export class PosComponent implements OnInit, OnDestroy {
   loadOrderDet(){
     this.loading = true;
     let params: Dsmodel = {
-      cols: 'd.id,p.name,d.price,d.qty,d.total',
+      cols: 'd.id,p.name,d.price,d.qty,d.total,d.discount',
       table: 'orderdet d',
       wc: 'ordernumber='+this.orderNumber,
       join: 'left join products p on d.product = p.id',
@@ -357,7 +371,7 @@ export class PosComponent implements OnInit, OnDestroy {
        //pid int,pprice decimal(6,2),pqty int,ptotal decimal(6,2)
        p = `editProductOrder(${this.productId},'${d.price}',${d.qty},'${d.total}')`;
     }else{
-      p = `addProductToOrder(${this.orderNumber},${this.productId},'${d.price}',${d.qty},'${d.total}')`;
+      p = `addProductToOrder(${this.orderNumber},${d.id},'${d.price}',${d.qty},'${d.total}','${d.discount}')`;
     }
           const a = { fn: p };
           this.subs = this.be.callSP(a).subscribe(
@@ -382,16 +396,58 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
  onSelect(e: TypeaheadMatch): void {
+   //console.debug(e.item);
+   const {price, class_id, id, name} = e.item;
     let params: Dsmodel = {
-      cols: 'id,name,price',
-      table: 'products',
+      cols: 'discount',
+      table: 'discounts',
       limit: '0, 1',
-      wc: `id=${e.item.id}`
+      wc: `class_id = ${class_id} and rank_id = ${this.selectedCustomer['rank_id']}`
     }
     this.loading=true;
     let timerInterval;
     this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
       if (d.length > 0) {
+        const disc = d[0].discount;
+        this.productId=id;
+        if(!this.multiMode){
+          let a={
+            qty:1,
+            price,
+            id,
+            discount: disc,
+            total: price - disc,
+          }
+         this.addProductOrder(a);
+        }else{
+          this.frmProduct.patchValue({
+            name: name,
+            price: price,
+            discount: disc
+          })
+          this.childModal.show();
+        }
+      }else{
+        if(!this.multiMode){
+          let a={
+            id,
+            qty:1,
+            price,
+            discount: 0,
+            total: price
+          }
+         this.addProductOrder(a);
+        }else{
+          this.frmProduct.patchValue({
+            name: name,
+            price: price,
+            discount: 0
+          })
+          this.childModal.show();
+        }
+      }//if else discount []
+
+      /* if (d.length > 0) {
         this.productId=d[0].id;
          // pordernumber int,pproduct int,pprice decimal(6,2),pqty int,ptotal decimal(6,2)
          if(!this.multiMode){
@@ -433,7 +489,7 @@ export class PosComponent implements OnInit, OnDestroy {
             clearInterval(timerInterval)
           }
         });
-      }
+      } */
     }, (e) => {
       Swal.fire(
         `Error!`,
@@ -445,8 +501,8 @@ export class PosComponent implements OnInit, OnDestroy {
       this.loading=false;
       const tinput = this.el.nativeElement.querySelector('#searchbar');
       tinput.value='';
-      const tinput2 = this.el.nativeElement.querySelector('#barcode');
-      tinput2.select();
+      //const tinput2 = this.el.nativeElement.querySelector('#barcode');
+      //tinput2.select();
     });
   }
 

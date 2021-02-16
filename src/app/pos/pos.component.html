@@ -28,21 +28,22 @@
         </div>
         <div class="card-body">
             <div class="hdn">
-                <Label>Customer: {{selectedCustomer.details || 'NO CUSTOMER SELECTED'}}</Label>
+                <Label>Customer: {{selectedCustomer['details'] || 'NO CUSTOMER SELECTED'}}</Label>
                 <input type="text" id="customer" [(ngModel)]="typeAheadCustomer" [typeahead]="customersData"
                     typeaheadOptionField="details" (typeaheadOnSelect)="onSelectCustomer($event)" class="form-control" placeholder="Customer"
                     typeaheadSingleWords="true" [typeaheadScrollable]="true" [typeaheadOptionsInScrollableView]="8">
             </div>
             <br>
             <div>
-                <label>Barcode:
+                <!-- <label>Barcode:
                     <input type="text" id="barcode" onfocus="document.execCommand('selectAll',false,null)" [(ngModel)]="barcode" (keyup.enter)="onBarcode()">
-                </label>
+                </label> -->
 
             </div>
             <div class="hdn">
+                <Label>Product</Label>
                 <input type="text" id="searchbar" [(ngModel)]="selectedValue" onfocus="document.execCommand('selectAll',false,null)" [typeahead]="productData"
-                    typeaheadOptionField="name" (typeaheadOnSelect)="onSelect($event)" class="form-control" placeholder="Search"
+                    typeaheadOptionField="details" (typeaheadOnSelect)="onSelect($event)" class="form-control" placeholder="Search"
                     typeaheadSingleWords="true" [typeaheadScrollable]="true" [typeaheadOptionsInScrollableView]="8">
             </div>
         </div>
@@ -69,6 +70,7 @@
                             <th>Quantity</th>
                             <th>Name</th>
                             <th>Price</th>
+                            <th>Discount</th>
                             <th>Total</th>
                             <th></th>
                         </tr>
@@ -84,6 +86,11 @@
                             <td (click)="onEditProduct(t)">
                                 <ng-container>
                                     <input type="text" readonly [ngModel]="t.price" (click)="onEditProduct(t)">
+                                </ng-container>
+                            </td>
+                            <td (click)="onEditProduct(t)">
+                                <ng-container>
+                                    <input type="text" readonly [ngModel]="t.discount" (click)="onEditProduct(t)">
                                 </ng-container>
                             </td>
                             <td (click)="onEditProduct(t)">{{t.total | currency : '₱'}}</td>
@@ -126,6 +133,10 @@
                         <div class="col">
                             <label>Price </label>
                             <input type="number" placeholder="Enter Price" class="form-control" formControlName="price">
+                        </div>
+                        <div class="col">
+                            <label>Discount </label>
+                            <input type="number" placeholder="Enter Price" class="form-control" formControlName="discount">
                         </div>
                     </div>
                 </div>

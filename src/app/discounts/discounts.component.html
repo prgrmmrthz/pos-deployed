@@ -1,1 +1,101 @@
-<p>discounts works!</p>
+<div *ngIf="loading" id="overlay">
+</div>
+<div class="container">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{title}}</h1>
+        <a class="btn btn-sm btn-secondary" [routerLink]="['/pos']">POS</a>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between">
+                <span>{{title}} List</span>
+                <div>
+                        <button class="btn btn-primary" (click)="openModal(template); mode=1">New Item</button>
+                </div>
+
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="float-right">
+                <div class="input-group mb-3">
+                    <input type="text" (keyup.enter)="onSearch($event)" class="form-control" placeholder="Search Keyword">
+                    <div class="input-group-append">
+                        <!-- <button type="button" (click)="onSearch()" class="btn btn-success"><i class="fa fa-search"
+                                      aria-hidden="true"></i></button> -->
+                        <button type="button" (click)="onRefresh()" class="btn btn-primary">
+                            <i class="fa fa-fw fa-refresh"></i>
+                        </button>
+                    </div>
+                </div>
+                </div>
+                <br>
+                <div class="table-responsive d-flex justify-content-center table-wrapper-scroll-y">
+                    <table class="table table-bordered table-sm">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Rank</th>
+                                <th>Classification</th>
+                                <th>Discount</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let t of itemData">
+                                <td>{{t.rank}}</td>
+                                <td>{{t.classification}}</td>
+                                <td>{{t.discount}}</td>
+                                <td class="text-right">
+                                    <i class="btn btn-sm btn-warning" style="color:black" (click)="onEditProduct(t, template)">Edit</i>
+                                    ||
+                                    <i class="btn btn-sm btn-danger" style="color:white" (click)="onDeleteProduct(t.id,t.name)">Delete</i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <ng-template #template>
+        <div class="modal-header">
+            <h4 class="modal-title pull-left">{{title}} [{{mode==1 ? 'New' : 'Edit'}}]</h4>
+        </div>
+        <form [formGroup]="frmX" (ngSubmit)="onSave()">
+            <div class="modal-body">
+                <div>
+                    <div class="col">
+                        <label>Rank </label>
+                        <br>
+                        <select class="form-select form-control" formControlName="rank_id">
+                            <option *ngFor="let c of ranksData" [ngValue]="c.id">
+                                {{ c.name }}
+                            </option>
+                          </select>
+                    </div>
+                    <div class="col">
+                        <label>Classification </label>
+                        <br>
+                        <select class="form-select form-control" formControlName="class_id">
+                            <option *ngFor="let c of classificationsData" [ngValue]="c.id">
+                                {{ c.name }}
+                            </option>
+                          </select>
+                    </div>
+                    <div class="col">
+                        <label>Discount </label>
+                        <input type="number" placeholder="Enter Discount" class="form-control" formControlName="discount">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div>
+                    <button type="submit" class="btn btn-success" [disabled]="!frmX.valid">Save</button>
+                </div>
+                <div>
+                    <button type="reset" class="btn btn-danger" (click)="onCancel()">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </ng-template>

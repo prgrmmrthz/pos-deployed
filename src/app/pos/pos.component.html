@@ -27,6 +27,13 @@
             </div>
         </div>
         <div class="card-body">
+            <div class="hdn">
+                <Label>Customer: {{selectedCustomer.details || 'NO CUSTOMER SELECTED'}}</Label>
+                <input type="text" id="customer" [(ngModel)]="typeAheadCustomer" [typeahead]="customersData"
+                    typeaheadOptionField="details" (typeaheadOnSelect)="onSelectCustomer($event)" class="form-control" placeholder="Customer"
+                    typeaheadSingleWords="true" [typeaheadScrollable]="true" [typeaheadOptionsInScrollableView]="8">
+            </div>
+            <br>
             <div>
                 <label>Barcode:
                     <input type="text" id="barcode" onfocus="document.execCommand('selectAll',false,null)" [(ngModel)]="barcode" (keyup.enter)="onBarcode()">

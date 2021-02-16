@@ -20,12 +20,16 @@ export class PosComponent implements OnInit, OnDestroy {
   @ViewChild('paymentModal', { static: false, }) paymentModal: ModalDirective;
   @ViewChild('orderSummary', { static: false, }) orderSummaryModal: ModalDirective;
   @ViewChild('qty') qty: ElementRef;
+  customerId: number;
   orderNumber: number;
   barcode: string;
   subs: Subscription;
   dataItems=[];
   selectedValue: string;
+  selectedCustomer = {};
+  typeAheadCustomer: string;
   productData = [];
+  customersData = [];
   loading: boolean;
   logs=[];
   gt: any;
@@ -61,18 +65,21 @@ export class PosComponent implements OnInit, OnDestroy {
       qty: [1, [Validators.pattern("^[0-9]*$")]],
       price: [0]
     });
-    
+
    }
 
   ngOnInit(): void {
     this.checkPreviousOrder();
-    this.getProduct();
-    this.storename=localStorage.getItem('storename') || '';
-    const tinput = this.el.nativeElement.querySelector('#barcode');
-    tinput.focus();
-    let a = new Date();
-    this.date=`${a.getMonth()+1}/${a.getDate()}/${a.getFullYear()}`;
-    this.time=`${a.getHours()}:${a.getMinutes()}`;
+    setTimeout(()=>{
+      this.getProduct();
+      this.getCustomers();
+      this.storename=localStorage.getItem('storename') || '';
+      const tinput = this.el.nativeElement.querySelector('#barcode');
+      tinput.focus();
+      let a = new Date();
+      this.date=`${a.getMonth()+1}/${a.getDate()}/${a.getFullYear()}`;
+      this.time=`${a.getHours()}:${a.getMinutes()}`;
+    }, 1000);
   }
 
   onCheckout() {
@@ -96,6 +103,8 @@ export class PosComponent implements OnInit, OnDestroy {
           this.createorderNumber();
         }else{
           this.orderNumber=r[0].orderid;
+          this.customerId = r[0].customerid;
+          //console.debug(this.customerId);
           this.loadOrderDet();
         }
       },
@@ -123,7 +132,7 @@ export class PosComponent implements OnInit, OnDestroy {
         event.preventDefault();
         this.onCheckout();
         //console.debug(event);
-    } 
+    }
   }
 
   createorderNumber(){
@@ -164,6 +173,69 @@ export class PosComponent implements OnInit, OnDestroy {
     }, () => this.loading = false);
   }
 
+  getCustomers() {
+    this.loading = true;
+    //console.debug('ito na',this.customerId);
+    if(this.customerId){
+      let params: Dsmodel = {
+        cols: 'c.id, c.name, c.rank_id, r.name as rank',
+        table: 'customers c',
+        join: 'left join ranks r on r.id=c.rank_id',
+        order: 'c.name asc',
+        limit : '0,1',
+        wc: 'c.id='+this.customerId
+      }
+      this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
+        const a = this.customersData = d.map((v,i) => {
+          const customer = {};
+          customer['details'] = `${v['name'].toUpperCase()} [${v.rank}]`;
+          customer['rank_id'] = v.rank_id;
+          customer['id'] = v.id;
+          return customer;
+        });
+        this.selectedCustomer = a[0];
+        console.debug('ito customer',this.selectedCustomer);
+      }, (e) => {
+        Swal.fire(
+          'Error Loading Data!',
+          JSON.stringify(e),
+          'error'
+        );
+        this.loading=false;
+      }, () => this.loading = false);
+    }//if customer
+
+    let params: Dsmodel = {
+      cols: 'c.id, c.name, c.rank_id, r.name as rank',
+      table: 'customers c',
+      join: 'left join ranks r on r.id=c.rank_id',
+      order: 'c.name asc'
+    }
+    this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
+      this.customersData = d.map((v,i) => {
+        const customer = {};
+        customer['details'] = `${v['name'].toUpperCase()} [${v.rank}]`;
+        customer['rank_id'] = v.rank_id;
+        customer['id'] = v.id;
+        return customer;
+      });
+    }, (e) => {
+      Swal.fire(
+        'Error Loading Data!',
+        JSON.stringify(e),
+        'error'
+      );
+      this.loading=false;
+    }, () => this.loading = false);
+  }
+
+  objectMap(object, mapFN){
+    return Object.keys(object).reduce((result,key)=>{
+      result[key] = mapFN(object[key])
+      return result
+    }, {})
+  }
+
   onEditProduct(t){
     this.subs=this.childModal.onShown.pipe( tap(() => (document.getElementById('qty') as HTMLElement).focus()) ).subscribe();
     this.productId=t.id;
@@ -173,7 +245,7 @@ export class PosComponent implements OnInit, OnDestroy {
       price: t.price,
       qty: t.qty
     });
-    
+
     this.childModal.show();
   }
 
@@ -240,7 +312,7 @@ export class PosComponent implements OnInit, OnDestroy {
 
   onSavePayment(){
     //orderid int, pordertotal decimal(10,2), psukli decimal(10,2)
-    let p = `checkoutOrder(${this.orderNumber},'${this.ordertotal}','${this.change}','${this.amountTendered}')`;; 
+    let p = `checkoutOrder(${this.orderNumber},'${this.ordertotal}','${this.change}','${this.amountTendered}')`;;
           const a = { fn: p };
           this.subs = this.be.callSP(a).subscribe(
             r => {
@@ -286,7 +358,7 @@ export class PosComponent implements OnInit, OnDestroy {
        p = `editProductOrder(${this.productId},'${d.price}',${d.qty},'${d.total}')`;
     }else{
       p = `addProductToOrder(${this.orderNumber},${this.productId},'${d.price}',${d.qty},'${d.total}')`;
-    }  
+    }
           const a = { fn: p };
           this.subs = this.be.callSP(a).subscribe(
             r => {
@@ -378,6 +450,35 @@ export class PosComponent implements OnInit, OnDestroy {
     });
   }
 
+  onSelectCustomer(e: TypeaheadMatch): void {
+    //console.debug(e);
+    this.selectedCustomer = e.item;
+    this.loading = true;
+    let p = `updateOrderCustomer(${e['item'].id},${this.orderNumber})`;
+    const a = { fn: p };
+    this.subs = this.be.callSP(a).subscribe(
+      r => {
+        const x = r[0].res;
+
+        if (x == 1) {
+          Swal.fire(
+            'Successfully saved!',
+            'Database has been updated.',
+            'success'
+          );
+        }
+      },
+      err => {
+        this.loading = false;
+        console.debug(err);
+        Swal.fire(`${err.statusText} ${err.status}`, JSON.stringify(err.error), "error")
+      },
+      () => {
+        this.loading = false;
+      }
+    );
+  }
+
   onBarcode() {
     if(this.barcode.length>0){
       let timerInterval;
@@ -456,7 +557,7 @@ export class PosComponent implements OnInit, OnDestroy {
       this.loading = false;
       console.debug(err);
       Swal.fire(`${err.statusText} ${err.status}`, JSON.stringify(err.error), "error")
-      
+
     },()=>{
       this.loading = false;
     });

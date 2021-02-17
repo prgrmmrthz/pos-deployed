@@ -15,6 +15,7 @@ require('jspdf-autotable');
 export class OrdersComponent implements OnInit, OnDestroy {
   frmSearch: FormGroup;
   searchOptions: { hKey: string; value: string; icon: string; }[];
+  searchFilterOptions: { hKey: string; value: string; icon: string; }[];
   subs: Subscription;
   Data: any[];
   loading: boolean;
@@ -31,8 +32,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
     private fb: FormBuilder
   ) {
     this.frmSearch = this.fb.group({
-      term: [''],
-      option: ['i.name', Validators.required],
+      filter: ['DATE(o.date) = CURDATE()'],
+      option: ['id', Validators.required],
       option2: ['asc']
     });
 
@@ -40,6 +41,24 @@ export class OrdersComponent implements OnInit, OnDestroy {
       {hKey: 'id', value: 'Order#', icon: ''},
       {hKey: 'date', value: 'Date', icon: ''},
       {hKey: 'ordertotal', value: 'Order Total', icon: ''}
+    ];
+
+    this.searchFilterOptions=[
+      {
+        hKey: 'DATE(o.date) = CURDATE()',
+        value: 'Daily',
+        icon: ''
+      },
+      {
+        hKey: 'MONTH(o.date) = MONTH(CURRENT_DATE()) AND YEAR(o.date) = YEAR(CURRENT_DATE())',
+        value: 'Monthly',
+        icon: ''
+      },
+      {
+        hKey: 'YEAR(o.date) = YEAR(CURRENT_DATE())',
+        value: 'Yearly',
+        icon: ''
+      }
     ]
   }
 
@@ -50,10 +69,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   getData(wc?, order?) {
     let params: Dsmodel = {
-      cols: 'id, sukli, amounttendered, DATE_FORMAT(date, "%c-%d-%y %l:%i") as date, ordertotal, sukli, amounttendered',
-      table: '`order`',
+      cols: `o.id,o.date,o.ordertotal,o.sukli,o.amounttendered,o.subtotal,o.discount,c.name as customer,r.name as rank`,
+      table: '`order` o',
       order: `${order? order : 'date DESC'}`,
-      wc: `${wc? wc : 'status=1'}`
+      wc: `${wc? 'status=1 AND '+wc : 'status=1 AND DATE(o.date) = CURDATE()'}`,
+      join: `left join customers c on c.id=o.customer_id left join ranks r on r.id=c.rank_id`
     }
     this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
       this.Data = d;
@@ -165,7 +185,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
   onSearch(){
     let f=this.frmSearch;
     setTimeout(()=>{
-      this.getData(`ordertotal like '%${this.g('term')}%'`, `${this.g('option')} ${this.g('option2')}`);
+      this.getData(`${this.g('filter')}`, `${this.g('option')} ${this.g('option2')}`);
     }, 800)
   }
 

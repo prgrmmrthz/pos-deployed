@@ -1,28 +1,35 @@
 <div class="container">
     <br>
     <div class="alert alert-info"><i class="fa fa-fw fa-info-circle fa-lg"></i>
-        <strong>Click print to generate and view stocks record.</strong>
+        <strong>Click print to generate Sales record.</strong>
     </div>
 
 
     <div class="card">
-        <div class="card-header">Orders Report Generator</div>
+        <div class="card-header">Sales Report Generator</div>
         <div class="card-body">
 
             <form [formGroup]="frmSearch" (ngSubmit)="onSearch()">
-                <div class="input-group mb-3">
+                <!-- <div class="input-group mb-3">
                     <input type="text" formControlName="term" (keyup)="onSearch()" class="form-control"
                         placeholder="Search Keyword">
                     <div class="input-group-append">
-                        <!-- <button type="button" (click)="onSearch()" class="btn btn-success"><i class="fa fa-search"
-                    aria-hidden="true"></i></button> -->
                         <button type="button" class="btn btn-primary" (click)="onRefresh()"><i
                                 class="fa fa-fw fa-refresh"></i>Refresh</button>
                     </div>
-                </div>
-                Sort By:
-                <div class="row justify-content-around">
-                    <div class="col-responsive">
+                </div> -->
+
+                <div class="row align-items-start">
+                    <div class="col-responsive p-1">
+                        <div class="form-group">
+                            <div class="btn-group btn-group-sm" btnRadioGroup formControlName="filter">
+                                <label *ngFor="let item of searchFilterOptions" [btnRadio]="item.hKey" class="btn btn-primary"
+                                    tabindex="0" role="button" (click)="onSearch()">{{item.value}}</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-responsive p-1">
                         <div class="form-group">
                             <div class="btn-group btn-group-sm" btnRadioGroup formControlName="option">
                                 <label *ngFor="let item of searchOptions" [btnRadio]="item.hKey" class="btn btn-primary"
@@ -30,13 +37,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-reponsive">
+                    <div class="col-reponsive p-1">
                         <div class="form-group">
                             <div class="btn-group btn-group-sm" btnRadioGroup formControlName="option2">
                                 <label btnRadio="asc" class="btn btn-info" tabindex="0" role="button"
-                                    (click)="onSearch()">Ascending</label>
+                                    (click)="onSearch()">A-Z</label>
                                 <label btnRadio="desc" class="btn btn-info" tabindex="0" role="button"
-                                    (click)="onSearch()">Descending</label>
+                                    (click)="onSearch()">Z-A</label>
                             </div>
                         </div>
                     </div>
@@ -55,14 +62,22 @@
                 <thead class="thead-dark">
                     <tr>
                         <th>Order#</th>
-                        <th>Date</th>
+                        <th>Date Time</th>
+                        <th>Customer</th>
+                        <th>Rank</th>
+                        <th>Sub Total</th>
+                        <th>Discount</th>
                         <th>Order Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr [class.active]="t.id == selectedId" (click)="selectData(t.id)" *ngFor="let t of Data">
                         <td>{{t.id}}</td>
-                        <td>{{t.date}}</td>
+                        <td>{{t.date | date: 'dd/MM/yyyy hh:mm'}}</td>
+                        <td>{{t.customer}}</td>
+                        <td>{{t.rank}}</td>
+                        <td align="right">{{t.subtotal | currency : '₱'}}</td>
+                        <td align="right">{{t.discount | currency : '₱'}}</td>
                         <td class="font-weight-bold" align="right">{{t.ordertotal | currency : '₱'}}</td>
                     </tr>
                 </tbody>
@@ -78,7 +93,7 @@
                     <i class="fa fa-leaf"></i>
                     <h4 id="dialog-child-name" class="modal-title pull-left">Order Summary</h4>
                 </div>
-    
+
                 <div class="modal-body">
                     <div id="toPrint">
                         <table cellpadding="2" item-width="100%">

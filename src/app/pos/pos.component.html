@@ -178,13 +178,14 @@
             <form (ngSubmit)="onSavePayment()">
                 <div class="modal-body">
                     <div class="alert alert-primary" role="alert" style="border:1px solid lightyellow;font:12px; border-left:3px solid blue;">
-                        <i class="fa fa-info-circle fa-lg"></i> Enter amount tendered and click save to proceed.
+                        <i class="fa fa-info-circle fa-lg"></i> Enter amount tendered and click <b>Proccess Payment</b> to proceed.
                     </div>
                     <div>
                         <div class="col">
-                            <h4>To Pay:
-                                <b>{{ordertotal | currency : '₱'}}</b>
-                            </h4>
+                            <h6><b>{{selectedCustomer['details'] || 'NO CUSTOMER SELECTED'}}</b></h6>
+                            <h6>Subtotal: {{subtotal | currency : '₱'}}</h6>
+                            <h6>Discount: {{discount | currency : '₱'}}</h6>
+                            <h5>Total: <b>{{ordertotal | currency : '₱'}}</b></h5>
                         </div>
                         <div class="col">
                             <p>Change:
@@ -198,11 +199,8 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">₱</span>
                                 </div>
-                                <input [autofocus] id="amountTendered" [(ngModel)]="amountTendered" (change)="computeChange()" type="number" class="form-control rounded-right"
+                                <input [autofocus] id="amountTendered" [(ngModel)]="amountTendered" (ngModelChange)="computeChange()" type="number" class="form-control rounded-right"
                                     required [ngModelOptions]="{standalone: true}">
-                                <div class="invalid-feedback">
-                                    Please choose a username.
-                                </div>
                             </div>
                         </div>
                     </div>

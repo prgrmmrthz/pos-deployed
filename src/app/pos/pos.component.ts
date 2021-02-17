@@ -328,7 +328,7 @@ export class PosComponent implements OnInit, OnDestroy {
 
   onSavePayment(){
     //orderid int, pordertotal decimal(10,2), psukli decimal(10,2)
-    let p = `checkoutOrder(${this.orderNumber},'${this.ordertotal}','${this.change}','${this.amountTendered}')`;;
+    const p = `checkoutOrder(${this.orderNumber},'${this.ordertotal}','${this.change}','${this.amountTendered}','${this.subtotal}','${this.discount}')`;
           const a = { fn: p };
           this.subs = this.be.callSP(a).subscribe(
             r => {

@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 var jsPDF = require('jspdf');
 require('jspdf-autotable');
+import {numberWithCommas} from '../utils/format';
 
 @Component({
   selector: 'app-orders',
@@ -86,17 +87,29 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   print() {
+    const dataPrint = this.Data.map((v)=>{
+      return {
+        date: v.date.replace('T', ' '),
+        subtotal: numberWithCommas(Number(v.subtotal).toFixed(2)),
+        discount: numberWithCommas(Number(v.discount).toFixed(2)),
+        ordertotal: numberWithCommas(Number(v.ordertotal).toFixed(2)),
+        id: v.id,
+        customer: v.customer,
+        rank: v.rank
+      }
+    });
     var columns = [
-      { title: "Item", dataKey: "name" },
-      { title: "Old Stock", dataKey: "oldstock" },
-      { title: "New P.O", dataKey: "newpo" },
-      { title: 'Production', dataKey: 'totalrelease'},
-      { title: "Date Updated", dataKey: "date" },
-      { title: "Total", dataKey: "total" }
+      { title: "Sales#", dataKey: "id" },
+      { title: "Date Time", dataKey: "date" },
+      { title: "Member", dataKey: "customer" },
+      { title: 'Rank', dataKey: 'rank'},
+      { title: "Subtotal", dataKey: "subtotal" },
+      { title: "Discount", dataKey: "discount" },
+      { title: "Total", dataKey: "ordertotal" }
     ];
     var doc = new jsPDF('p', 'pt', 'letter');
     var totalPagesExp = "{total_pages_count_string}";
-    doc.autoTable(columns, this.Data, {
+    doc.autoTable(columns, dataPrint, {
       theme: 'grid',
       startY: false, // false (indicates margin top value) or a number
       tableWidth: 'auto', // 'auto', 'wrap' or a number
@@ -112,29 +125,34 @@ export class OrdersComponent implements OnInit, OnDestroy {
       },
       margin: { top: 160 },
       columnStyles: {
-        total: {
+        ordertotal: {
           halign: 'right',
           fontStyle: 'bold'
         },
-        oldstock: {
+        discount: {
           halign: 'right'
         },
-        newpo: {
+        subtotal: {
           halign: 'right'
         },
         date: {
           halign: 'center'
         },
-        totalrelease: {
+        id: {
+          halign: 'center',
+          columnWidth: 40
+        }
+/*         totalrelease: {
           halign: 'right',
           columnWidth: 60
-        }
+        } */
       },
       didDrawPage: function (dataToPrint) {
+        console.debug(dataPrint);
         doc.setFontSize(18);
-        doc.text(`Stock Report`, 110, 80);
+        doc.text(`Sales Report`, 110, 80);
         doc.setFontSize(12);
-        doc.text(`Date: ${new Date().toLocaleDateString()}`, 40, 120);
+        doc.text(`Date Printed: ${new Date().toLocaleDateString()}`, 40, 120);
         // FOOTER
         var str = "Page " + dataToPrint.pageCount;
         // Total page number plugin only available in jspdf v1.0+

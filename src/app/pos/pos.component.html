@@ -22,29 +22,43 @@
                     <b>{{orderNumber}}</b>
                 </div>
                 <div>
-                    <button style="color:white" class="btn btn-sm btn-primary" [class.btn-danger]="multiMode" (click)="multiMode=!multiMode">{{multiMode? 'Multi': 'Single'}} Mode [ALT]</button>
+                    <button style="color:white" class="btn btn-sm btn-primary" [class.btn-danger]="multiMode" (click)="multiMode=!multiMode">{{multiMode? 'Multi': 'Single'}} Mode [F1]</button>
                 </div>
             </div>
         </div>
         <div class="card-body">
-            <div class="hdn">
-                <Label>Customer: {{selectedCustomer['details'] || 'NO CUSTOMER SELECTED'}}</Label>
-                <input type="text" id="customer" [(ngModel)]="typeAheadCustomer" [typeahead]="customersData"
-                    typeaheadOptionField="details" (typeaheadOnSelect)="onSelectCustomer($event)" class="form-control" placeholder="Customer"
-                    typeaheadSingleWords="true" [typeaheadScrollable]="true" [typeaheadOptionsInScrollableView]="8">
-            </div>
-            <br>
-            <div>
-                <!-- <label>Barcode:
-                    <input type="text" id="barcode" onfocus="document.execCommand('selectAll',false,null)" [(ngModel)]="barcode" (keyup.enter)="onBarcode()">
-                </label> -->
+            <div class="row">
+                <div class="col">
+                    <div class="hdn input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Customer</span>
+                        </div>
+                        <input type="text" id="customer" [(ngModel)]="typeAheadCustomer" [typeahead]="customersData"
+                            typeaheadOptionField="details" (typeaheadOnSelect)="onSelectCustomer($event)" class="form-control" placeholder="Customer"
+                            typeaheadSingleWords="true" [typeaheadScrollable]="true" [typeaheadOptionsInScrollableView]="8">
+                    </div>
+                    <br>
+                    <div>
+                        <!-- <label>Barcode:
+                            <input type="text" id="barcode" onfocus="document.execCommand('selectAll',false,null)" [(ngModel)]="barcode" (keyup.enter)="onBarcode()">
+                        </label> -->
 
-            </div>
-            <div class="hdn">
-                <Label>Product</Label>
-                <input type="text" id="searchbar" [(ngModel)]="selectedValue" onfocus="document.execCommand('selectAll',false,null)" [typeahead]="productData"
-                    typeaheadOptionField="details" (typeaheadOnSelect)="onSelect($event)" class="form-control" placeholder="Search"
-                    typeaheadSingleWords="true" [typeaheadScrollable]="true" [typeaheadOptionsInScrollableView]="8">
+                    </div>
+                    <div class="hdn input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Product</span>
+                        </div>
+                        <input type="text" id="searchbar" [(ngModel)]="selectedValue" onfocus="document.execCommand('selectAll',false,null)" [typeahead]="productData"
+                            typeaheadOptionField="details" (typeaheadOnSelect)="onSelect($event)" class="form-control" placeholder="Search"
+                            typeaheadSingleWords="true" [typeaheadScrollable]="true" [typeaheadOptionsInScrollableView]="8">
+                    </div>
+                </div>
+                <div class="col-6 text-right">
+                    <h6><b>{{selectedCustomer['details'] || 'NO CUSTOMER SELECTED'}}</b></h6>
+                    <h6>Subtotal: {{subtotal | currency : '₱'}}</h6>
+                    <h6>Discount: {{discount | currency : '₱'}}</h6>
+                    <h5>Total: <b>{{ordertotal | currency : '₱'}}</b></h5>
+                </div>
             </div>
         </div>
     </div>
@@ -56,7 +70,6 @@
                     <i class="fas fa-shopping-cart mr-1"></i>Cart
                 </div>
                 <div>
-                    <h1>Total: {{ordertotal | currency : '₱'}}</h1>
                     <button class="btn btn-warning" (click)="onVoid()">
                         <i class="fas fa-ban mr-1"></i>Void</button>
                 </div>
@@ -69,6 +82,7 @@
                         <tr>
                             <th>Quantity</th>
                             <th>Name</th>
+                            <th>Classification</th>
                             <th>Price</th>
                             <th>Discount</th>
                             <th>Total</th>
@@ -83,6 +97,7 @@
                                 </ng-container>
                             </td>
                             <td (click)="onEditProduct(t)">{{t.name}}</td>
+                            <td (click)="onEditProduct(t)">{{t.class}}</td>
                             <td (click)="onEditProduct(t)">
                                 <ng-container>
                                     <input type="text" readonly [ngModel]="t.price" (click)="onEditProduct(t)">

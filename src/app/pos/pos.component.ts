@@ -63,8 +63,8 @@ export class PosComponent implements OnInit, OnDestroy {
     this.frmProduct = this.fb.group({
       name: [{value: "",  disabled: true}],
       qty: [1, [Validators.pattern("^[0-9]*$")]],
-      price: [0 ,[Validators.pattern("/^(?:\d*\.\d{1,2}|\d+)$/")]],
-      discount: [0, [Validators.pattern("/^(?:\d*\.\d{1,2}|\d+)$/")]]
+      price: [0 ,[Validators.required]],
+      discount: [0, [Validators.required]]
     });
 
    }
@@ -266,6 +266,7 @@ export class PosComponent implements OnInit, OnDestroy {
   onFormSave(){
     const {price,qty,discount} = this.frmProduct.value;
     let a={
+      id: this.productId,
       price,
       qty,
       discount,
@@ -286,7 +287,8 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
   computeTotal() {
-    this.subtotal= this.dataItems.reduce((a, b) => a + b.total, 0);
+    this.subtotal= this.dataItems.reduce((a, b) => a + (b.price*b.qty), 0);
+    this.discount= this.dataItems.reduce((a, b) => a + b.discount, 0);
     this.ordertotal=this.subtotal - this.discount;
   }
 
@@ -302,14 +304,14 @@ export class PosComponent implements OnInit, OnDestroy {
   loadOrderDet(){
     this.loading = true;
     let params: Dsmodel = {
-      cols: 'd.id,p.name,d.price,d.qty,d.total,d.discount',
+      cols: 'd.id,p.name,d.price,d.qty,d.total,d.discount,c.name as class',
       table: 'orderdet d',
       wc: 'ordernumber='+this.orderNumber,
-      join: 'left join products p on d.product = p.id',
+      join: 'left join products p on d.product = p.id LEFT JOIN classifications c on c.id = p.class_id',
       order: 'id'
     }
     this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
-      this.dataItems = d;
+      this.dataItems = [...d];
     }, (e) => {
       Swal.fire(
         'Error Loading Data!',
@@ -369,7 +371,7 @@ export class PosComponent implements OnInit, OnDestroy {
     let p = '';
     if(this.mode===2){
        //pid int,pprice decimal(6,2),pqty int,ptotal decimal(6,2)
-       p = `editProductOrder(${this.productId},'${d.price}',${d.qty},'${d.total}')`;
+       p = `editProductOrder(${this.productId},'${d.price}',${d.qty},'${d.total}','${d.discount}')`;
     }else{
       p = `addProductToOrder(${this.orderNumber},${d.id},'${d.price}',${d.qty},'${d.total}','${d.discount}')`;
     }
@@ -387,123 +389,101 @@ export class PosComponent implements OnInit, OnDestroy {
             },
             () => {
               this.loading = false;
-              const tinput2 = this.el.nativeElement.querySelector('#barcode');
-              tinput2.select();
-                    }
+              //const tinput2 = this.el.nativeElement.querySelector('#barcode');
+              //tinput2.select();
+            }
           );
           this.mode=1;
           this.computeTotal();
   }
 
  onSelect(e: TypeaheadMatch): void {
-   //console.debug(e.item);
-   const {price, class_id, id, name} = e.item;
-    let params: Dsmodel = {
-      cols: 'discount',
-      table: 'discounts',
-      limit: '0, 1',
-      wc: `class_id = ${class_id} and rank_id = ${this.selectedCustomer['rank_id']}`
-    }
+    //console.debug(this.selectedCustomer);
+    const {price, class_id, id, name} = e.item;
+    this.productId=id;
     this.loading=true;
-    let timerInterval;
-    this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
-      if (d.length > 0) {
-        const disc = d[0].discount;
-        this.productId=id;
-        if(!this.multiMode){
-          let a={
-            qty:1,
-            price,
-            id,
-            discount: disc,
-            total: price - disc,
+    if(this.selectedCustomer['id']){//if has customer selected
+          let params: Dsmodel = {
+            cols: 'discount',
+            table: 'discounts',
+            limit: '0, 1',
+            wc: `class_id = ${class_id} and rank_id = ${this.selectedCustomer['rank_id']}`
           }
-         this.addProductOrder(a);
-        }else{
-          this.frmProduct.patchValue({
-            name: name,
-            price: price,
-            discount: disc
-          })
-          this.childModal.show();
-        }
-      }else{
-        if(!this.multiMode){
-          let a={
-            id,
-            qty:1,
-            price,
-            discount: 0,
-            total: price
-          }
-         this.addProductOrder(a);
-        }else{
-          this.frmProduct.patchValue({
-            name: name,
-            price: price,
-            discount: 0
-          })
-          this.childModal.show();
-        }
-      }//if else discount []
-
-      /* if (d.length > 0) {
-        this.productId=d[0].id;
-         // pordernumber int,pproduct int,pprice decimal(6,2),pqty int,ptotal decimal(6,2)
-         if(!this.multiMode){
-           let a={
-             qty:1,
-             price: d[0].price,
-             total: d[0].price
-           }
-          this.addProductOrder(a);
-         }else{
-           this.frmProduct.patchValue({
-             name: d[0].name,
-             price: d[0].price
-           })
-           this.childModal.show();
-         }
-      } else {
-        Swal.fire({
-          title: 'No Product found!',
-          icon: 'error',
-          html: `<p>Please check barcode.<p><br>auto close in <b></b> milliseconds.`,
-          allowEnterKey: true,
-          allowEscapeKey: true,
-          timer: 500,
-          timerProgressBar: true,
-          onBeforeOpen: () => {
-            Swal.showLoading()
-            timerInterval = setInterval(() => {
-              const content = Swal.getContent()
-              if (content) {
-                const b = content.querySelector('b')
-                if (b) {
-                  b.textContent = Swal.getTimerLeft().toString()
+          this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
+            if (d.length > 0) {//if has discount
+              const disc = d[0].discount;
+              if(!this.multiMode){
+                let a={
+                  qty:1,
+                  price,
+                  id,
+                  discount: disc,
+                  total: price - disc,
                 }
+              this.addProductOrder(a);
+              }else{
+                this.frmProduct.patchValue({
+                  name: name,
+                  price: price,
+                  discount: disc,
+                  qty: 1
+                })
+                this.childModal.show();
               }
-            }, 100)
-          },
-          onClose: () => {
-            clearInterval(timerInterval)
-          }
-        });
-      } */
-    }, (e) => {
-      Swal.fire(
-        `Error!`,
-        JSON.stringify(e),
-        'warning'
-      );
-      this.loading=false;
-    }, () => {
-      this.loading=false;
-      const tinput = this.el.nativeElement.querySelector('#searchbar');
-      tinput.value='';
-      //const tinput2 = this.el.nativeElement.querySelector('#barcode');
-      //tinput2.select();
-    });
+            }else{
+              if(!this.multiMode){
+                let a={
+                  id,
+                  qty:1,
+                  price,
+                  discount: 0,
+                  total: price
+                }
+              this.addProductOrder(a);
+              }else{
+                this.frmProduct.patchValue({
+                  name: name,
+                  price: price,
+                  discount: 0,
+                  qty: 1
+                })
+                this.childModal.show();
+              }
+            }//if else discount []
+          }, (e) => {
+            Swal.fire(
+              `Error!`,
+              JSON.stringify(e),
+              'warning'
+            );
+            this.loading=false;
+          }, () => {
+            this.loading=false;
+            const tinput = this.el.nativeElement.querySelector('#searchbar');
+            tinput.value='';
+            //const tinput2 = this.el.nativeElement.querySelector('#barcode');
+            //tinput2.select();
+          });//getData
+    }else{
+      if(!this.multiMode){
+        let a={
+          id,
+          qty:1,
+          price,
+          discount: 0,
+          total: price
+        }
+      this.addProductOrder(a);
+      }else{
+        this.frmProduct.patchValue({
+          name: name,
+          price: price,
+          discount: 0,
+          qty: 1
+        })
+        this.childModal.show();
+      }
+    }
   }
 
   onSelectCustomer(e: TypeaheadMatch): void {

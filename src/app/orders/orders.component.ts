@@ -76,7 +76,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
       join: `left join customers c on c.id=o.customer_id left join ranks r on r.id=c.rank_id`
     }
     this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
-      this.Data = d;
+      this.Data = [...d];
+      this.computeTotal();
     }, (err) => {
       this.loading = false;
         //console.debug(err);
@@ -195,6 +196,10 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   onRefresh(){
     this.getData();
+  }
+
+  computeTotal() {
+    this.ordertotal= this.Data.reduce((a, b) => a + b.ordertotal, 0);
   }
 
   ngOnDestroy(): void {

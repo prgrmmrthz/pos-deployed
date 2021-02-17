@@ -6,52 +6,73 @@
 
 
     <div class="card">
-        <div class="card-header">Sales Report Generator</div>
+        <div class="card-header mb-3">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap">
+                <div>
+                    <i class="fas fa-table mr-1"></i>Order#:
+                    <b>Sales Report Generator</b>
+                </div>
+                <div>
+                    <button style="color:white" class="btn btn-sm btn-primary" (click)="print()">
+                        <i class="fa fa-fw fa-print fa-lg"></i> Print
+                    </button>
+                </div>
+            </div>
+        </div>
         <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <form [formGroup]="frmSearch" (ngSubmit)="onSearch()">
+                        <!-- <div class="input-group mb-3">
+                            <input type="text" formControlName="term" (keyup)="onSearch()" class="form-control"
+                                placeholder="Search Keyword">
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-primary" (click)="onRefresh()"><i
+                                        class="fa fa-fw fa-refresh"></i>Refresh</button>
+                            </div>
+                        </div> -->
 
-            <form [formGroup]="frmSearch" (ngSubmit)="onSearch()">
-                <!-- <div class="input-group mb-3">
-                    <input type="text" formControlName="term" (keyup)="onSearch()" class="form-control"
-                        placeholder="Search Keyword">
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-primary" (click)="onRefresh()"><i
-                                class="fa fa-fw fa-refresh"></i>Refresh</button>
-                    </div>
-                </div> -->
+                        <div class="row align-items-start">
+                            <div class="col-responsive p-1">
+                                <div class="form-group">
+                                    <div class="btn-group btn-group-sm" btnRadioGroup formControlName="filter">
+                                        <label *ngFor="let item of searchFilterOptions" [btnRadio]="item.hKey" class="btn btn-primary"
+                                            tabindex="0" role="button" (click)="onSearch()">{{item.value}}</label>
+                                    </div>
+                                </div>
+                            </div>
 
-                <div class="row align-items-start">
-                    <div class="col-responsive p-1">
-                        <div class="form-group">
-                            <div class="btn-group btn-group-sm" btnRadioGroup formControlName="filter">
-                                <label *ngFor="let item of searchFilterOptions" [btnRadio]="item.hKey" class="btn btn-primary"
-                                    tabindex="0" role="button" (click)="onSearch()">{{item.value}}</label>
+                            <div class="col-responsive p-1">
+                                <div class="form-group">
+                                    <div class="btn-group btn-group-sm" btnRadioGroup formControlName="option">
+                                        <label *ngFor="let item of searchOptions" [btnRadio]="item.hKey" class="btn btn-primary"
+                                            tabindex="0" role="button" (click)="onSearch()">{{item.value}}</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-reponsive p-1">
+                                <div class="form-group">
+                                    <div class="btn-group btn-group-sm" btnRadioGroup formControlName="option2">
+                                        <label btnRadio="asc" class="btn btn-info" tabindex="0" role="button"
+                                            (click)="onSearch()">A-Z</label>
+                                        <label btnRadio="desc" class="btn btn-info" tabindex="0" role="button"
+                                            (click)="onSearch()">Z-A</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="col-responsive p-1">
-                        <div class="form-group">
-                            <div class="btn-group btn-group-sm" btnRadioGroup formControlName="option">
-                                <label *ngFor="let item of searchOptions" [btnRadio]="item.hKey" class="btn btn-primary"
-                                    tabindex="0" role="button" (click)="onSearch()">{{item.value}}</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-reponsive p-1">
-                        <div class="form-group">
-                            <div class="btn-group btn-group-sm" btnRadioGroup formControlName="option2">
-                                <label btnRadio="asc" class="btn btn-info" tabindex="0" role="button"
-                                    (click)="onSearch()">A-Z</label>
-                                <label btnRadio="desc" class="btn btn-info" tabindex="0" role="button"
-                                    (click)="onSearch()">Z-A</label>
+                    </form>
+                </div>
+                <div class="col-4">
+                    <div class="row  align-items-end">
+                        <div class="col-reponsive p-1">
+                            <div class="form-group">
+                                <h5>Total Sales: <b>{{ordertotal | currency : '₱'}}</b></h5>
                             </div>
                         </div>
                     </div>
                 </div>
-            </form>
-            <button class="btn btn-sm btn-success" (click)="print()"><i
-                    class="fa fa-fw fa-print fa-lg"></i><b>Print</b></button>
-
+            </div>
         </div>
     </div>
     <br>

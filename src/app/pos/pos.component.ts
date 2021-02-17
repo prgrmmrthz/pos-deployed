@@ -308,7 +308,7 @@ export class PosComponent implements OnInit, OnDestroy {
       table: 'orderdet d',
       wc: 'ordernumber='+this.orderNumber,
       join: 'left join products p on d.product = p.id LEFT JOIN classifications c on c.id = p.class_id',
-      order: 'id'
+      order: 'd.id'
     }
     this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
       this.dataItems = [...d];

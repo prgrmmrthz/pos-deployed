@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
 import { TypeaheadMatch } from 'ngx-bootstrap/typeahead/public_api';
 import * as es6printJS from "print-js";
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 @Component({
   selector: 'app-pos',
@@ -139,11 +140,12 @@ export class PosComponent implements OnInit, OnDestroy {
   createorderNumber(){
     this.loading = true;
     let p = '';
-    p = `createOrder()`;
+    p = `createOrder(${this.be.userId})`;
     const a = { fn: p };
     this.subs = this.be.callSP(a).subscribe(
       r => {
         this.orderNumber = r[0].res;
+        this.loadOrderDet();
       },
       err => {
         this.loading = false;
@@ -328,7 +330,7 @@ export class PosComponent implements OnInit, OnDestroy {
 
   onSavePayment(){
     //orderid int, pordertotal decimal(10,2), psukli decimal(10,2)
-    const p = `checkoutOrder(${this.orderNumber},'${this.ordertotal}','${this.change}','${this.amountTendered}','${this.subtotal}','${this.discount}')`;
+    const p = `checkoutOrder(${this.orderNumber},'${this.ordertotal}','${this.change}','${this.amountTendered}','${this.subtotal}','${this.discount}',${this.be.userId})`;
           const a = { fn: p };
           this.subs = this.be.callSP(a).subscribe(
             r => {
@@ -364,7 +366,14 @@ export class PosComponent implements OnInit, OnDestroy {
   }
 
   newOrder(){
-    window.location.reload();
+    this.loading = true;
+    this.createorderNumber();
+    this.selectedCustomer = {};
+    this.typeAheadCustomer = '';
+    setTimeout(()=>{
+      this.orderSummaryModal.hide();
+      this.loading =false;
+    }, 200);
   }
 
   addProductOrder(d){

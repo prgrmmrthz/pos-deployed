@@ -41,6 +41,8 @@ import { DiscountsComponent } from './discounts/discounts.component';
 import { OrderDetailComponent } from './order-detail/order-detail.component';
 import { LoginComponent } from './login/login.component';
 import { MainPageComponent } from './main-page/main-page.component';
+import { HashLocationStrategy, LocationStrategy } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 let options: Partial<IConfig> | (() => Partial<IConfig>);
 

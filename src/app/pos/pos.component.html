@@ -31,10 +31,10 @@
                 <div class="col">
                     <div class="hdn input-group input-group-sm">
                         <div class="input-group-prepend">
-                            <span class="input-group-text">Customer</span>
+                            <span class="input-group-text">{{customerTitle}}</span>
                         </div>
                         <input type="text" id="customer" [(ngModel)]="typeAheadCustomer" [typeahead]="customersData"
-                            typeaheadOptionField="details" (typeaheadOnSelect)="onSelectCustomer($event)" class="form-control" placeholder="Customer"
+                            typeaheadOptionField="details" (typeaheadOnSelect)="onSelectCustomer($event)" class="form-control" [placeholder]="'Search for '+ customerTitle"
                             typeaheadSingleWords="true" [typeaheadScrollable]="true" [typeaheadOptionsInScrollableView]="8">
                     </div>
                     <br>
@@ -54,7 +54,7 @@
                     </div>
                 </div>
                 <div class="col-6 text-right">
-                    <h6><b>{{selectedCustomer['details'] || 'NO CUSTOMER SELECTED'}}</b></h6>
+                    <h6><b>{{selectedCustomer['details'] || 'NO '+ customerTitle + ' selected'}}</b></h6>
                     <h6>Subtotal: {{subtotal | currency : '₱'}}</h6>
                     <h6>Discount: {{discount | currency : '₱'}}</h6>
                     <h5>Total: <b>{{ordertotal | currency : '₱'}}</b></h5>
@@ -96,7 +96,7 @@
                                     <input type="text" readonly [ngModel]="t.qty" (click)="onEditProduct(t)">
                                 </ng-container>
                             </td>
-                            <td (click)="onEditProduct(t)"><b>{{t.name}}</b></td>
+                            <td (click)="onEditProduct(t)"><b>{{t.name | uppercase}}</b></td>
                             <td (click)="onEditProduct(t)">{{t.class}}</td>
                             <td (click)="onEditProduct(t)">
                                 <ng-container>

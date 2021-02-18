@@ -37,7 +37,9 @@
                                 <div class="form-group">
                                     <div class="btn-group btn-group-sm" btnRadioGroup formControlName="filter">
                                         <label *ngFor="let item of searchFilterOptions" [btnRadio]="item.hKey" class="btn btn-primary"
-                                            tabindex="0" role="button" (click)="onSearch()">{{item.value}}</label>
+                                            tabindex="0" role="button" (click)="onSearch()">
+                                            <i [class]="item.icon" aria-hidden="true"></i> {{item.value}}
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -46,7 +48,9 @@
                                 <div class="form-group">
                                     <div class="btn-group btn-group-sm" btnRadioGroup formControlName="option">
                                         <label *ngFor="let item of searchOptions" [btnRadio]="item.hKey" class="btn btn-primary"
-                                            tabindex="0" role="button" (click)="onSearch()">{{item.value}}</label>
+                                            tabindex="0" role="button" (click)="onSearch()">
+                                            <i [class]="item.icon" aria-hidden="true"></i> {{item.value}}
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -54,9 +58,12 @@
                                 <div class="form-group">
                                     <div class="btn-group btn-group-sm" btnRadioGroup formControlName="option2">
                                         <label btnRadio="asc" class="btn btn-info" tabindex="0" role="button"
-                                            (click)="onSearch()">A-Z</label>
+                                            (click)="onSearch()">
+                                            <i class="fa fa-sort" aria-hidden="true"></i> A-Z
+                                        </label>
                                         <label btnRadio="desc" class="btn btn-info" tabindex="0" role="button"
-                                            (click)="onSearch()">Z-A</label>
+                                            (click)="onSearch()"><i class="fa fa-sort" aria-hidden="true"></i> Z-A
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -67,7 +74,7 @@
                     <div class="row  align-items-end">
                         <div class="col-reponsive p-1">
                             <div class="form-group">
-                                <h5>Total Sales: <b>{{ordertotal | currency : '₱'}}</b></h5>
+                                <h5>Total {{salesTitle && salesTitle}} Sales: <b>{{ordertotal | currency : '₱'}}</b></h5>
                             </div>
                         </div>
                     </div>
@@ -84,7 +91,7 @@
                     <tr>
                         <th>Order#</th>
                         <th>Date Time</th>
-                        <th>Customer</th>
+                        <th>Member</th>
                         <th>Rank</th>
                         <th>Sub Total</th>
                         <th>Discount</th>
@@ -92,7 +99,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr [class.active]="t.id == selectedId" (click)="selectData(t.id)" *ngFor="let t of Data">
+                    <tr [class.active]="t.id == selectedId" (click)="selectData(t.id)" *ngFor="let t of Data" (dblclick)="openOrderDetailsModal(t)">
                         <td>{{t.id}}</td>
                         <td>{{t.date | date: 'dd/MM/yyyy hh:mm'}}</td>
                         <td>{{t.customer}}</td>

@@ -52,6 +52,7 @@ export class PosComponent implements OnInit, OnDestroy {
   amountTendered: number;
   date="";
   time="";
+  customerTitle: string ="Member";
 
   constructor(
     private be: BackendService,

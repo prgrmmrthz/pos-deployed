@@ -3,10 +3,12 @@ import { BackendService } from '../backend.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Dsmodel } from '../dsmodel.Interface';
 import { Subscription } from 'rxjs';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import Swal from 'sweetalert2/dist/sweetalert2.js';
 var jsPDF = require('jspdf');
 require('jspdf-autotable');
 import {numberWithCommas} from '../utils/format';
+import { OrderDetailComponent } from '../order-detail/order-detail.component';
 
 @Component({
   selector: 'app-orders',
@@ -27,10 +29,13 @@ export class OrdersComponent implements OnInit, OnDestroy {
   ordertotal: any;
   storename: string;
   date: any;
+  salesTitle: string ="Daily";
+  bsModalRef: BsModalRef;
 
   constructor(
     private be: BackendService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private modalService: BsModalService
   ) {
     this.frmSearch = this.fb.group({
       filter: ['DATE(o.date) = CURDATE()'],
@@ -41,24 +46,26 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.searchOptions=[
       {hKey: 'id', value: 'Order#', icon: ''},
       {hKey: 'date', value: 'Date', icon: ''},
-      {hKey: 'ordertotal', value: 'Order Total', icon: ''}
+      {hKey: 'ordertotal', value: 'Total', icon: ''},
+      {hKey: 'customer', value: 'Member', icon: ''},
+      {hKey: 'r.id', value: 'Rank', icon: ''}
     ];
 
     this.searchFilterOptions=[
       {
         hKey: 'DATE(o.date) = CURDATE()',
         value: 'Daily',
-        icon: ''
+        icon: 'fa fa-filter'
       },
       {
         hKey: 'MONTH(o.date) = MONTH(CURRENT_DATE()) AND YEAR(o.date) = YEAR(CURRENT_DATE())',
         value: 'Monthly',
-        icon: ''
+        icon: 'fa fa-filter'
       },
       {
         hKey: 'YEAR(o.date) = YEAR(CURRENT_DATE())',
         value: 'Yearly',
-        icon: ''
+        icon: 'fa fa-filter'
       }
     ]
   }
@@ -87,6 +94,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   print() {
+    const salesTitle = this.salesTitle;
     const dataPrint = this.Data.map((v)=>{
       return {
         date: v.date.replace('T', ' '),
@@ -98,6 +106,15 @@ export class OrdersComponent implements OnInit, OnDestroy {
         rank: v.rank
       }
     });
+    dataPrint.push({
+      date: "",
+      subtotal: "",
+      id: "",
+      customer: "",
+      rank: "",
+      discount: "Total Sales",
+      ordertotal: numberWithCommas(Number(this.ordertotal).toFixed(2))
+    })
     var columns = [
       { title: "Sales#", dataKey: "id" },
       { title: "Date Time", dataKey: "date" },
@@ -148,11 +165,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
         } */
       },
       didDrawPage: function (dataToPrint) {
-        console.debug(dataPrint);
+        //console.debug(dataPrint);
         doc.setFontSize(18);
-        doc.text(`Sales Report`, 110, 80);
+        doc.text(`${salesTitle} Sales Report`, 40, 80);
         doc.setFontSize(12);
-        doc.text(`Date Printed: ${new Date().toLocaleDateString()}`, 40, 120);
+        doc.text(`Date Printed: ${new Date().toLocaleDateString()}`, 40, 100);
         // FOOTER
         var str = "Page " + dataToPrint.pageCount;
         // Total page number plugin only available in jspdf v1.0+
@@ -175,35 +192,13 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.selectedId=id;
   }
 
-  loadOrderDet(sukli, amounttendered, ordertotal){
-    this.change=sukli;
-    this.amountTendered=amounttendered;
-    this.ordertotal=ordertotal;
-    this.loading = true;
-    let params: Dsmodel = {
-      cols: 'd.id,p.name,d.price,d.qty,d.total',
-      table: 'orderdet d',
-      wc: 'ordernumber='+this.selectedId,
-      join: 'left join products p on d.product = p.id',
-      order: 'id'
-    }
-    this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
-      this.dataItems = d;
-    }, (e) => {
-      Swal.fire(
-        'Error Loading Data!',
-        JSON.stringify(e),
-        'error'
-      );
-      this.loading=false;
-    }, () => {
-      this.loading = false;
-    });
-  }
-
   onSearch(){
-    let f=this.frmSearch;
     setTimeout(()=>{
+      const a = this.searchFilterOptions.findIndex((v,i)=> {
+        if(v.hKey == this.g('filter'))
+          return true;
+      });
+      this.salesTitle = this.searchFilterOptions[a].value;
       this.getData(`${this.g('filter')}`, `${this.g('option')} ${this.g('option2')}`);
     }, 800)
   }
@@ -218,6 +213,15 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   computeTotal() {
     this.ordertotal= this.Data.reduce((a, b) => a + b.ordertotal, 0);
+  }
+
+  openOrderDetailsModal(t){
+    const { id, customer, rank, subtotal, discount, ordertotal } = t;
+    const initialState = {
+      id, customer, rank, subtotal, discount, ordertotal
+    };
+    this.bsModalRef = this.modalService.show(OrderDetailComponent, { class: 'modal-xl', initialState });
+    this.bsModalRef.content.closeBtnName='Close';
   }
 
   ngOnDestroy(): void {

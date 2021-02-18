@@ -1,0 +1,50 @@
+    <div class="modal-header">
+      <h4 class="modal-title pull-left">Sales Details</h4>
+      <button type="button" class="close pull-right" aria-label="Close" (click)="bsModalRef.hide()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col">
+                <h6><b>{{customer | uppercase}}</b></h6>
+                <h6><b>{{rank | uppercase}}</b></h6>
+            </div>
+        </div>
+        <br />
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Qty</th>
+                        <th>Product</th>
+                        <th>Classification</th>
+                        <th>Price</th>
+                        <th>Discount</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let t of Data">
+                        <td>{{t.qty}}</td>
+                        <td>{{t.product | uppercase}}</td>
+                        <td>{{t.class}}</td>
+                        <td align="right">{{t.price | currency : '₱'}}</td>
+                        <td align="right">{{t.discount | currency : '₱'}}</td>
+                        <td class="font-weight-bold" align="right">{{t.total | currency : '₱'}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col text-right">
+                <h6>Subtotal: {{subtotal | currency : '₱'}}</h6>
+                <h6>Discount: {{discount | currency : '₱'}}</h6>
+                <h5>Total: <b>{{ordertotal | currency : '₱'}}</b></h5>
+            </div>
+        </div>
+    </div>
+    <!-- <div class="modal-footer">
+      <button type="button" class="btn btn-default" (click)="bsModalRef.hide()">{{closeBtnName}}</button>
+    </div> -->

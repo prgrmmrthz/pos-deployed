@@ -89,7 +89,8 @@
             <table class="table table-sm">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Order#</th>
+                        <th>Sales#</th>
+                        <th>Processed by</th>
                         <th>Date Time</th>
                         <th>Member</th>
                         <th>Rank</th>
@@ -101,6 +102,7 @@
                 <tbody>
                     <tr [class.active]="t.id == selectedId" (click)="selectData(t.id)" *ngFor="let t of Data" (dblclick)="openOrderDetailsModal(t)">
                         <td>{{t.id}}</td>
+                        <td>{{t.user_name}}</td>
                         <td>{{t.date | date: 'dd/MM/yyyy hh:mm'}}</td>
                         <td>{{t.customer}}</td>
                         <td>{{t.rank}}</td>

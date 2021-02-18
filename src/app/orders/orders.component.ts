@@ -77,11 +77,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   getData(wc?, order?) {
     let params: Dsmodel = {
-      cols: `o.id,o.date,o.ordertotal,o.sukli,o.amounttendered,o.subtotal,o.discount,c.name as customer,r.name as rank`,
+      cols: `o.id,o.date,o.ordertotal,o.sukli,o.amounttendered,o.subtotal,o.discount,c.name as customer,r.name as rank,u.name as user_name`,
       table: '`order` o',
       order: `${order? order : 'date DESC'}`,
       wc: `${wc? 'status=1 AND '+wc : 'status=1 AND DATE(o.date) = CURDATE()'}`,
-      join: `left join customers c on c.id=o.customer_id left join ranks r on r.id=c.rank_id`
+      join: `left join customers c on c.id=o.customer_id left join ranks r on r.id=c.rank_id left join user u on u.id = o.user`
     }
     this.subs = this.be.getDataWithJoinClause(params).subscribe(d => {
       this.Data = [...d];
@@ -94,9 +94,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   print() {
+    const user_name=localStorage.getItem('username');
     const salesTitle = this.salesTitle;
     const dataPrint = this.Data.map((v)=>{
       return {
+        user_name: v.user_name,
         date: v.date.replace('T', ' '),
         subtotal: numberWithCommas(Number(v.subtotal).toFixed(2)),
         discount: numberWithCommas(Number(v.discount).toFixed(2)),
@@ -108,6 +110,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     });
     dataPrint.push({
       date: "",
+      user_name: "",
       subtotal: "",
       id: "",
       customer: "",
@@ -117,6 +120,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     })
     var columns = [
       { title: "Sales#", dataKey: "id" },
+      { title: "Processed by", dataKey: "user_name" },
       { title: "Date Time", dataKey: "date" },
       { title: "Member", dataKey: "customer" },
       { title: 'Rank', dataKey: 'rank'},
@@ -178,7 +182,10 @@ export class OrdersComponent implements OnInit, OnDestroy {
         }
         doc.setFontSize(10);
         var pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
-        doc.text(str, dataToPrint.settings.margin.left, pageHeight - 10);
+        doc.text("Printed by: "+user_name, dataToPrint.settings.margin.right, pageHeight - 40);
+        doc.setFontSize(8);
+        var pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
+        doc.text(str, dataToPrint.settings.margin.right, pageHeight - 10);
       }
     });
     if (typeof doc.putTotalPages === 'function') {

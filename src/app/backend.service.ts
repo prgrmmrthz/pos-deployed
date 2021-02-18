@@ -10,12 +10,22 @@ const httpOptions = {
   providedIn: 'root'
 })
 export class BackendService {
+  loggedInStatus = false;
+  userId: number = 0;
 
   //private gu = 'http://localhost:81/api/general';
   private gu = 'http://localhost:36076/api/general';
   //private gu = 'http://localhost:4000/general';
 
   constructor(private http: HttpClient) { }
+
+  setLoggedIn(v) {
+    this.loggedInStatus = v;
+  }
+
+  get isLoggedIn() {
+    return this.loggedInStatus;
+  }
 
   getDataWithJoinClause(p: Dsmodel) {
     let a={

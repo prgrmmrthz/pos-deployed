@@ -67,7 +67,6 @@ export class PosComponent implements OnInit, OnDestroy {
       price: [0 ,[Validators.required]],
       discount: [0, [Validators.required]]
     });
-
    }
 
   ngOnInit(): void {

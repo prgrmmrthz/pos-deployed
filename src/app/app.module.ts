@@ -39,6 +39,8 @@ import { CustomersComponent } from './customers/customers.component';
 import { RankCategoriesComponent } from './rank-categories/rank-categories.component';
 import { DiscountsComponent } from './discounts/discounts.component';
 import { OrderDetailComponent } from './order-detail/order-detail.component';
+import { LoginComponent } from './login/login.component';
+import { MainPageComponent } from './main-page/main-page.component';
 
 let options: Partial<IConfig> | (() => Partial<IConfig>);
 
@@ -70,6 +72,8 @@ let options: Partial<IConfig> | (() => Partial<IConfig>);
     RankCategoriesComponent,
     DiscountsComponent,
     OrderDetailComponent,
+    LoginComponent,
+    MainPageComponent,
   ],
   imports: [
     BrowserModule,
